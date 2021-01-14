@@ -1,6 +1,14 @@
 #define MAX_ADDR_LEN 32
 #define ERROR_LEN "BITS LENGTH ERROR"
 
+//output style
+#define RSCLR "\033[0m"
+#define REDBG "\033[7;31m"
+#define BLUBG "\033[7;34m"
+#define WHIGB "\033[7;37m"
+#define GRCLR "\033[1;32m"
+
+
 typedef struct
 {
     int prefix;

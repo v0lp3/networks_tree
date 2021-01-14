@@ -60,6 +60,27 @@ private:
 		}
 	}
 
+	/* Function that check and index the subnet */
+	void index_subnet(subnet *net)
+	{
+		bool present = false;
+
+		for (auto &snet : *subnetworks)
+		{
+
+			if (snet == net)
+			{
+				present = true;
+			}
+		}
+
+		if (!present)
+		{
+
+			subnetworks->push_back(net);
+		}
+	}
+
 	/* Service procedure to sets subnets info */
 	void _set_netmasks(netbitn *node, string path)
 	{
@@ -70,7 +91,8 @@ private:
 				node->net->prefix = prefix_len + path.length();
 				node->net->first_addr = bin_to_ip(complete_octet(base_addr, path, 0));
 				node->net->last_addr = bin_to_ip(complete_octet(base_addr, path, 1));
-				subnetworks->push_back(node->net); // indexing for avoid research
+
+				index_subnet(node->net); // indexing for avoid research
 			}
 
 			_set_netmasks(node->sx, path + '0');
