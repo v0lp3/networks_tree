@@ -4,6 +4,7 @@
 typedef struct
 {
     int prefix;
+    std::string name;
     std::string first_addr;
     std::string last_addr;
 

@@ -2,7 +2,6 @@
 
 #include <cmath>
 #include <vector>
-#include <string>
 #include "netdef.h"
 #include "netutil.cpp"
 
@@ -34,7 +33,7 @@ private:
 	}
 
 	/* Service procedure to allocate subnet*/
-	void _add_subnetwork(netbitn *node, int level, bool &allocated)
+	void _add_subnetwork(netbitn *node, int level, string net_name, bool &allocated)
 	{
 		if (node && node->net == NULL && !(allocated || node->level < level))
 		{
@@ -42,6 +41,7 @@ private:
 			if (node->level == level && node->sx == NULL && node->dx == NULL)
 			{
 				node->net = new subnet;
+				node->net->name = net_name;
 				allocated = true;
 			}
 
@@ -50,12 +50,12 @@ private:
 				if (node->sx == NULL)
 					node->sx = create_netbitn(node->level - 1);
 
-				_add_subnetwork(node->sx, level, allocated);
+				_add_subnetwork(node->sx, level, net_name, allocated);
 
 				if (node->dx == NULL)
 					node->dx = create_netbitn(node->level - 1);
 
-				_add_subnetwork(node->dx, level, allocated);
+				_add_subnetwork(node->dx, level, net_name, allocated);
 			}
 		}
 	}
@@ -90,13 +90,13 @@ public:
 	}
 
 	/* Allocates address space in network tree  */
-	void add_subnetwork(int max_hosts)
+	void add_subnetwork(int max_hosts, string net_name)
 	{
 
 		int level = log2(max_hosts) + 1;
 		bool allocated = false; // multi-allocation avoidance
 
-		_add_subnetwork(root, level, allocated);
+		_add_subnetwork(root, level, net_name, allocated);
 	}
 
 	/* Sets subnetworks info in the structures*/
