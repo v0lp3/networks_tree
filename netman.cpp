@@ -67,18 +67,12 @@ private:
 
 		for (auto &snet : *subnetworks)
 		{
-
 			if (snet == net)
-			{
 				present = true;
-			}
 		}
 
 		if (!present)
-		{
-
 			subnetworks->push_back(net);
-		}
 	}
 
 	/* Service procedure to sets subnets info */

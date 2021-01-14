@@ -8,7 +8,6 @@
 #define WHIBG "\033[7;37m"
 #define GRCLR "\033[1;32m"
 
-
 typedef struct
 {
     int prefix;
