@@ -1,5 +1,4 @@
 #include "netman.cpp"
-#include <iostream>
 using namespace std;
 
 class core
@@ -8,22 +7,24 @@ class core
 private:
     netman *tree;
 
+    /* Prints formatted strings */
     ostream &format_output(ostream &os, const string line, const string style)
     {
-        os << style << line << RSCLR;
-        return os;
+        return os << style << line << RSCLR;
     }
 
+    /* Prints formatted error message/info*/
     void print_line(const string attribute, const string value, const string bg)
     {
         format_output(cout, attribute, bg);
         format_output(cout, '\t' + value, GRCLR) << endl;
     }
 
+    /* Prints info */
     void print_header()
     {
         system(" clear ");
-        cout << "## Network Tree //" << endl;
+        cout << "## Networks Tree //" << endl;
         cout << "\n";
         print_line("credits:", "Andrea Maugeri", REDBG);
         print_line("version:", "0.0.0.1 (alpha)", REDBG);
@@ -31,9 +32,9 @@ private:
         cout << "\n";
     }
 
+    /* Prints the list of commands */
     void print_commands()
     {
-
         cout << "List of commands: " << endl;
         cout << "\n";
         print_line("help", "Show list of commands", BLUBG);
@@ -42,9 +43,9 @@ private:
         cout << "\n";
     }
 
-    int gen_tree()
+    /* Initialize networks tree*/
+    int init_tree()
     {
-
         string tmp;
         string range;
         int prefix;
@@ -61,6 +62,7 @@ private:
             }
         }
 
+        // basic error handling
         if (prefix > 32)
         {
             print_line("error", "Invalid prefix", REDBG);
@@ -68,36 +70,32 @@ private:
         }
 
         else
-        {
-
             tree = new netman(range, prefix);
-        }
 
         cout << endl;
         return 0;
     }
 
+    /* Prints any subnetwork in formatted way */
     void print_net(subnet *net)
     {
-
         cout << "\n";
-        format_output(cout, net->name, WHIGB) << endl;
+        format_output(cout, net->name, WHIBG) << endl;
         format_output(cout, "addresses: ", GRCLR);
         cout << net->first_addr << " - " << net->last_addr << endl;
         format_output(cout, "mask: ", GRCLR) << net->prefix << endl;
     }
 
+    /* Prints all subnetwork in formatted way */
     void show_nets()
     {
-
         vector<subnet *> nets = *tree->get_all();
 
         for (auto &net : nets)
-        {
             print_net(net);
-        }
     }
 
+    /* Adds new subnet to networks tree */
     void add_subnet()
     {
         int max_hosts;
@@ -114,12 +112,14 @@ private:
 public:
     core() {}
 
+    /* Returns -1 if initialization fail */
     int init()
     {
         print_header();
-        return gen_tree();
+        return init_tree();
     }
 
+    /* Parse user input */
     void execute_command()
     {
         print_commands();
@@ -130,24 +130,16 @@ public:
             cin >> command;
 
             if (command == "show")
-            {
                 show_nets();
-            }
 
             else if (command == "help")
-            {
                 print_commands();
-            }
 
             else if (command == "add")
-            {
                 add_subnet();
-            }
 
             else
-            {
                 print_line("error:", "invalid command", REDBG);
-            }
         }
     }
 };

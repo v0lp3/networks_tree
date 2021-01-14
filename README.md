@@ -1,4 +1,4 @@
-# Network tree
+# Networks tree
 
 ## Work in progress
 

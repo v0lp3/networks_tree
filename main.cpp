@@ -4,11 +4,10 @@ using namespace std;
 
 int main()
 {
+	core system; 
 
-	core main;
-
-	if (main.init() != -1)
+	if (system.init() != -1)
 	{
-		main.execute_command();
+		system.execute_command();
 	}
 }
