@@ -7,6 +7,7 @@
 #define BLUBG "\033[7;34m"
 #define WHIBG "\033[7;37m"
 #define GRCLR "\033[1;32m"
+#define REDCLR "\033[1;31m"
 
 typedef struct
 {

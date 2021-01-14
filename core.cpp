@@ -26,9 +26,9 @@ private:
         system(" clear ");
         cout << "## Networks Tree //" << endl;
         cout << "\n";
-        print_line("credits:", "Andrea Maugeri", REDBG);
-        print_line("version:", "0.0.0.1 (alpha)", REDBG);
-        print_line("status: ", "Work in progress", REDBG);
+        print_line("credits:", "Andrea Maugeri", REDCLR);
+        print_line("version:", "0.0.0.1 (alpha)", REDCLR);
+        print_line("status: ", "Work in progress", REDCLR);
         cout << "\n";
     }
 
