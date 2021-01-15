@@ -7,7 +7,5 @@ int main()
 	core system;
 
 	if (system.init() != -1)
-	{
 		system.execute_command();
-	}
 }

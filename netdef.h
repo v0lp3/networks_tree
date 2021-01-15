@@ -12,6 +12,7 @@
 typedef struct
 {
     bool router;
+    std::string name;
     std::string address;
     std::string gateway;
 } netface;
@@ -19,7 +20,7 @@ typedef struct
 typedef struct
 {
     int prefix;
-    netface *devices;
+    netface **devices;
     std::string name;
     std::string first_addr;
     std::string last_addr;
@@ -31,6 +32,7 @@ struct bitnode
     struct bitnode *sx;
     struct bitnode *dx;
     int level;
+    bool defined;
 };
 
 typedef bitnode netbitn;
