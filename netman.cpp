@@ -172,7 +172,7 @@ public:
 	}
 
 	/* Add devices to the subnetwork */
-	const int add_device(const string net_name, const string dev_name, const bool router)
+	const int attach_device(const string net_name, const string dev_name, const bool router)
 	{
 		const subnet *sel_subnet = get_net_by_name(net_name);
 

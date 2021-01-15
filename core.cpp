@@ -31,7 +31,7 @@ private:
         cout << "Input device name: ";
         cin >> dev_name;
 
-        int ret_code = tree->add_device(subnet_name, dev_name, false);
+        int ret_code = tree->attach_device(subnet_name, dev_name, false);
         switch (ret_code)
         {
         case -1:
