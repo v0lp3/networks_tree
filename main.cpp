@@ -4,10 +4,8 @@ using namespace std;
 
 int main()
 {
-	core system; 
+	core system;
 
 	if (system.init() != -1)
-	{
 		system.execute_command();
-	}
 }
