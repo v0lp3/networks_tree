@@ -128,4 +128,11 @@ public:
 		set_netmasks();
 		return subnetworks;
 	}
+
+	/* Delete all subnetworks */
+	void clear_all()
+	{
+		root = create_netbitn(MAX_ADDR_LEN - prefix_len);
+		subnetworks->clear();
+	}
 };

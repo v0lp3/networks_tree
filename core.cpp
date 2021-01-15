@@ -37,9 +37,10 @@ private:
     {
         cout << "List of commands: " << endl;
         cout << "\n";
-        print_line("help", "Show list of commands", BLUBG);
-        print_line("show", "Show all subnetworks", BLUBG);
-        print_line("add ", "Add new subnetwork", BLUBG);
+        print_line("help ", "Show list of commands", BLUBG);
+        print_line("show ", "Show all subnetworks", BLUBG);
+        print_line("add  ", "Add new subnetwork", BLUBG);
+        print_line("clear", "Delete all subnetworks", BLUBG);
         cout << "\n";
     }
 
@@ -109,6 +110,13 @@ private:
         tree->add_subnetwork(max_hosts, net_name);
     }
 
+    void clear_subnets()
+    {
+
+        tree->clear_all();
+        print_line("system:", "all subnetworks deleted", REDBG);
+    }
+
 public:
     core() {}
 
@@ -137,6 +145,9 @@ public:
 
             else if (command == "add")
                 add_subnet();
+
+            else if (command == "clear")
+                clear_subnets();
 
             else
                 print_line("error:", "invalid command", REDBG);
