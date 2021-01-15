@@ -8,16 +8,32 @@ private:
     netman *tree;
 
     /* Prints formatted strings */
-    ostream &format_output(ostream &os, const string line, const string style)
+    ostream &format_output(const string line, const string style)
     {
-        return os << style << line << RSCLR;
+        return cout << style << line << RSCLR;
     }
 
     /* Prints formatted error message/info*/
     void print_line(const string attribute, const string value, const string bg)
     {
-        format_output(cout, attribute, bg);
-        format_output(cout, '\t' + value, GRCLR) << endl;
+        format_output(attribute, bg);
+        format_output('\t' + value, GRCLR) << endl;
+    }
+
+    void assign_device()
+    {
+        string subnet_name;
+        cout << "Input subnet name: ";
+        cin >> subnet_name;
+        subnet *sel = tree->get_by_name(subnet_name);
+
+        if (sel == NULL)
+            print_line("error", "subnet doesn't exists", REDBG);
+
+        else
+        {
+             print_line("info", "work in progress", BLUBG);
+        }
     }
 
     /* Prints info */
@@ -27,7 +43,6 @@ private:
         cout << "## Networks Tree //" << endl;
         cout << "\n";
         print_line("credits:", "Andrea Maugeri", REDCLR);
-        print_line("version:", "0.0.0.1 (alpha)", REDCLR);
         print_line("status: ", "Work in progress", REDCLR);
         cout << "\n";
     }
@@ -37,10 +52,12 @@ private:
     {
         cout << "List of commands: " << endl;
         cout << "\n";
-        print_line("help ", "Show list of commands", BLUBG);
-        print_line("show ", "Show all subnetworks", BLUBG);
-        print_line("add  ", "Add new subnetwork", BLUBG);
-        print_line("clear", "Delete all subnetworks", BLUBG);
+        print_line("help  ", "Show list of commands", BLUBG);
+        print_line("show  ", "Show all subnetworks", BLUBG);
+        print_line("add   ", "Add new subnetwork", BLUBG);
+        print_line("clear ", "Delete all subnetworks", BLUBG);
+        print_line("assign", "Popolate subnetwork", BLUBG);
+
         cout << "\n";
     }
 
@@ -81,10 +98,10 @@ private:
     void print_net(subnet *net)
     {
         cout << "\n";
-        format_output(cout, net->name, WHIBG) << endl;
-        format_output(cout, "addresses: ", GRCLR);
+        format_output(net->name, WHIBG) << endl;
+        format_output("addresses: ", GRCLR);
         cout << net->first_addr << " - " << net->last_addr << endl;
-        format_output(cout, "mask: ", GRCLR) << net->prefix << endl;
+        format_output("mask: ", GRCLR) << net->prefix << endl;
     }
 
     /* Prints all subnetwork in formatted way */
@@ -107,7 +124,8 @@ private:
         cout << "Input max hosts: ";
         cin >> max_hosts;
 
-        tree->add_subnetwork(max_hosts, net_name);
+        if (tree->add_subnetwork(max_hosts, net_name) == -1)
+            print_line("error:", "subnet name already in use", REDBG);
     }
 
     void clear_subnets()
@@ -148,6 +166,9 @@ public:
 
             else if (command == "clear")
                 clear_subnets();
+
+            else if (command == "assign")
+                assign_device();
 
             else
                 print_line("error:", "invalid command", REDBG);

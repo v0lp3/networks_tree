@@ -63,15 +63,7 @@ private:
 	/* Function that check and index the subnet */
 	void index_subnet(subnet *net)
 	{
-		bool present = false;
-
-		for (auto &snet : *subnetworks)
-		{
-			if (snet == net)
-				present = true;
-		}
-
-		if (!present)
+		if (get_by_name(net->name) == NULL)
 			subnetworks->push_back(net);
 	}
 
@@ -85,8 +77,9 @@ private:
 				node->net->prefix = prefix_len + path.length();
 				node->net->first_addr = bin_to_ip(complete_octet(base_addr, path, 0));
 				node->net->last_addr = bin_to_ip(complete_octet(base_addr, path, 1));
+				node->net->devices = new netface[int(pow(2, MAX_ADDR_LEN - node->net->prefix))]; // array positon represents the interface
 
-				index_subnet(node->net); // indexing for avoid research
+				index_subnet(node->net); // indexing for avoid research in entire tree
 			}
 
 			_set_netmasks(node->sx, path + '0');
@@ -105,14 +98,33 @@ public:
 		subnetworks = new vector<subnet *>();
 	}
 
-	/* Allocates address space in network tree  */
-	void add_subnetwork(int max_hosts, string net_name)
+	/* Returns subnetwork by name */
+	subnet *get_by_name(string name)
 	{
+		for (auto &net : *subnetworks)
+		{
+			if (net->name == name)
+				return net;
+		}
 
-		int level = log2(max_hosts) + 1;
-		bool allocated = false; // multi-allocation avoidance
+		return NULL;
+	}
 
-		_add_subnetwork(root, level, net_name, allocated);
+	/* Allocates address space in network tree  */
+	int add_subnetwork(int max_hosts, string net_name)
+	{
+		if (get_by_name(net_name) == NULL)
+		{
+			int level = log2(max_hosts) + 1;
+			bool allocated = false; // multi-allocation avoidance
+
+			_add_subnetwork(root, level, net_name, allocated);
+			set_netmasks();
+
+			return 0;
+		}
+
+		return -1;
 	}
 
 	/* Sets subnetworks info in the structures*/
@@ -125,7 +137,6 @@ public:
 	/* Returns vector of subnetworks pointers*/
 	vector<subnet *> *get_all()
 	{
-		set_netmasks();
 		return subnetworks;
 	}
 

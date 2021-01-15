@@ -11,11 +11,18 @@
 
 typedef struct
 {
+    bool router;
+    std::string address;
+    std::string gateway;
+} netface;
+
+typedef struct
+{
     int prefix;
+    netface *devices;
     std::string name;
     std::string first_addr;
     std::string last_addr;
-
 } subnet;
 
 struct bitnode
