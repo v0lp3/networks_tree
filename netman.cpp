@@ -159,9 +159,24 @@ public:
 	}
 
 	/* Returns vector of subnetworks pointers*/
-	const vector<subnet *> *get_all()
+	const vector<subnet *> *get_all_net()
 	{
 		return subnetworks;
+	}
+
+	vector<netface *> *get_routers(subnet *net)
+	{
+		vector<netface *> *routers = new vector<netface *>();
+
+		int bound = MAX_ADDR_LEN - net->prefix;
+
+		for (int i = 0; i < pow(2, bound); i++)
+		{
+			if (net->devices[i] && net->devices[i]->router)
+				routers->push_back(net->devices[i]);
+		}
+
+		return routers;
 	}
 
 	/* Deletes all subnetworks */
@@ -174,19 +189,33 @@ public:
 	/* Add devices to the subnetwork */
 	const int attach_device(const string net_name, const string dev_name, const bool router)
 	{
-		const subnet *sel_subnet = get_net_by_name(net_name);
+		subnet *sel_subnet = get_net_by_name(net_name);
 
 		if (sel_subnet == NULL) // subnet not exists
 			return -1;
 
-		if (get_dev_by_name(dev_name, sel_subnet) != NULL) //device already exists
+		else if (get_dev_by_name(dev_name, sel_subnet) != NULL) //device already exists
 			return -2;
 
-		const int bound = pow(2, MAX_ADDR_LEN - sel_subnet->prefix);
-		const int interface = rand() % (bound - 1); // avoid broadcast address
+		else if (get_routers(sel_subnet)->empty() && !router)
+			return -3;
 
-		// generation of a valid ipv4 address in the range
-		sel_subnet->devices[interface] = init_netface(router, dev_name, bin_to_ip(complete_address(get_bin_prefix(sel_subnet->first_addr, sel_subnet->prefix), int_to_bin(interface), 0)));
-		return 0;
+		else
+		{
+
+			const int bound = pow(2, MAX_ADDR_LEN - sel_subnet->prefix);
+			const int interface = rand() % (bound - 1); // avoid broadcast address
+
+			// generation of a valid ipv4 address in the range
+			sel_subnet->devices[interface] = init_netface(router, dev_name, bin_to_ip(complete_address(get_bin_prefix(sel_subnet->first_addr, sel_subnet->prefix), int_to_bin(interface), 0)));
+
+			if (router == false)
+			{
+				vector<netface *> routers = *get_routers(sel_subnet);
+				sel_subnet->devices[interface]->gateway = routers[rand() % routers.size()]->address;
+			}
+
+			return 0;
+		}
 	}
 };

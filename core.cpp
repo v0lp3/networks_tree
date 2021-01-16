@@ -25,21 +25,36 @@ private:
     {
         string subnet_name;
         string dev_name;
+        string is_router;
+
+        int ret_code;
 
         cout << "Input subnet name: ";
         cin >> subnet_name;
+        cout << "Device is router? (y/N): ";
+        cin >> is_router;
         cout << "Input device name: ";
         cin >> dev_name;
 
-        int ret_code = tree->attach_device(subnet_name, dev_name, false);
+        if (is_router == "y")
+            ret_code = tree->attach_device(subnet_name, dev_name, true);
+        else
+            ret_code = tree->attach_device(subnet_name, dev_name, false);
+
         switch (ret_code)
         {
         case -1:
             print_line("error:", "subnet doesn't exists", REDBG);
             break;
+
         case -2:
             print_line("error:", "device name already in use", REDBG);
             break;
+
+        case -3:
+            print_line("error:", "add at least one router first", REDBG);
+            break;
+
         default:
             print_line("system:", "address assigned to device", BLUBG);
             break;
@@ -106,7 +121,15 @@ private:
     /* Prints any device in formatted way */
     const void print_dev(netface *dev)
     {
-        print_line(dev->name, dev->address, REDCLR);
+        print_line(dev->name + ':', "", GRCLR);
+        print_line("\taddress:", dev->address, REDCLR);
+        if (dev->router)
+            print_line("\ttype:", "\trouter", REDCLR);
+        else
+        {
+            print_line("\tgateway:", dev->gateway, REDCLR);
+            print_line("\ttype:", "\thost", REDCLR);
+        }
     }
 
     /* Prints any subnetwork in formatted way */
@@ -132,7 +155,7 @@ private:
     /* Prints all subnetwork in formatted way */
     const void show_nets()
     {
-        vector<subnet *> nets = *tree->get_all();
+        vector<subnet *> nets = *tree->get_all_net();
 
         for (auto &net : nets)
             print_net(net);
