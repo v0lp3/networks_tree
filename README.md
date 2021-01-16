@@ -1,5 +1,7 @@
 # Networks tree
+> Design your network and output interfaces configuration file
 
-## Work in progress
-
-Design your network and output interfaces configuration file
+### Build
+```
+g++ main.cpp
+```
