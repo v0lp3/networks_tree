@@ -121,16 +121,19 @@ private:
     /* Prints any device in formatted way */
     const void print_dev(netface *dev)
     {
-        print_line(dev->name + ':', "", GRCLR);
-        print_line("\taddress:", dev->address, REDCLR);
-
-        if (dev->router)
-            print_line("\ttype:", "\trouter", REDCLR);
-
-        else
+        if (dev)
         {
-            print_line("\tgateway:", dev->gateway, REDCLR);
-            print_line("\ttype:", "\thost", REDCLR);
+            print_line(dev->name + ':', "", GRCLR);
+            print_line("\taddress:", dev->address, REDCLR);
+
+            if (dev->router)
+                print_line("\ttype:", "\trouter", REDCLR);
+
+            else
+            {
+                print_line("\tgateway:", dev->gateway, REDCLR);
+                print_line("\ttype:", "\thost", REDCLR);
+            }
         }
     }
 
@@ -147,11 +150,8 @@ private:
         format_output("mask: ", GRCLR) << net->prefix << endl; // total prefix length
 
         // list of all devices attached
-        for (int i = 0; i < pow(2, MAX_ADDR_LEN - net->prefix); i++)
-        {
-            if (net->devices[i])
-                print_dev(net->devices[i]);
-        }
+        for (int i = 0; i < get_bound(net->prefix); i++)
+            print_dev(net->devices[i]);
     }
 
     /* Prints all subnetwork in formatted way */

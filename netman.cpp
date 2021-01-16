@@ -53,6 +53,7 @@ private:
 			{
 				node->net = new subnet;
 				node->net->name = net_name;
+				node->net->devices = NULL;
 				allocated = true;
 			}
 
@@ -216,8 +217,7 @@ public:
 				vector<netface *> routers = *get_all_routers(sel_subnet);
 				sel_subnet->devices[interface]->gateway = routers[rand() % routers.size()]->address;
 			}
-
-			return 0;
 		}
+		return 0;
 	}
 };
