@@ -155,7 +155,7 @@ private:
     /* Prints all subnetwork in formatted way */
     const void show_nets()
     {
-        vector<subnet *> nets = *tree->get_all_net();
+        vector<subnet *> nets = *tree->get_all_nets();
 
         for (auto &net : nets)
             print_net(net);

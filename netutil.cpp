@@ -60,12 +60,12 @@ const string int_to_bin(int integer)
 }
 
 /* Converts base 10 to fixed-length base 2 */
-const string complete_octet(const int integer)
+const string complete_octet(const int integer, int n)
 {
     string octet = int_to_bin(integer); // es. 10 => |1010| < 8
 
     // 0 => 00000000
-    int bound = 8 - octet.length();
+    int bound = n - octet.length();
 
     for (int i = 0; i < bound; i++)
         octet = '0' + octet;
@@ -84,14 +84,14 @@ const string ip_to_bin(const string address)
     {
         if (address[i] == '.')
         {
-            bits += complete_octet(parse_int(tmp_number));
+            bits += complete_octet(parse_int(tmp_number), 8);
             tmp_number = "";
         }
         else
             tmp_number += address[i];
     }
 
-    bits += complete_octet(parse_int(tmp_number));
+    bits += complete_octet(parse_int(tmp_number), 8);
 
     return (bits.length() == MAX_ADDR_LEN) ? bits : ERROR_LEN;
 }

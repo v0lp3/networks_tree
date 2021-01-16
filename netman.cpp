@@ -159,7 +159,7 @@ public:
 	}
 
 	/* Returns vector of subnetworks pointers*/
-	const vector<subnet *> *get_all_net()
+	const vector<subnet *> *get_all_nets()
 	{
 		return subnetworks;
 	}
@@ -204,10 +204,16 @@ public:
 		{
 
 			const int bound = pow(2, MAX_ADDR_LEN - sel_subnet->prefix);
-			const int interface = rand() % (bound - 1); // avoid broadcast address
+			int interface; // avoid broadcast address
+
+			do
+				interface = rand() % (bound - 1);
+			while (sel_subnet->devices[interface] != NULL);
+
+			std::cout << interface << std::endl;
 
 			// generation of a valid ipv4 address in the range
-			sel_subnet->devices[interface] = init_netface(router, dev_name, bin_to_ip(complete_address(get_bin_prefix(sel_subnet->first_addr, sel_subnet->prefix), int_to_bin(interface), 0)));
+			sel_subnet->devices[interface] = init_netface(router, dev_name, bin_to_ip(get_bin_prefix(sel_subnet->first_addr, sel_subnet->prefix) + complete_octet(interface, MAX_ADDR_LEN - sel_subnet->prefix)));
 
 			if (router == false)
 			{
