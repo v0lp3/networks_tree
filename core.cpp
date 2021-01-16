@@ -55,6 +55,10 @@ private:
             print_line("error:", "add at least one router first", REDBG);
             break;
 
+        case -4:
+            print_line("error:", "no address available", REDBG);
+            break;
+
         default:
             print_line("system:", "address assigned to device", BLUBG);
             break;

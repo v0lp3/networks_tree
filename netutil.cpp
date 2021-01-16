@@ -109,6 +109,13 @@ const string get_bin_prefix(const string address, const int prefix_len)
     return addr_bin.substr(0, prefix_len);
 }
 
+/* Returns the minimum number of levels needed */
+const int get_total_level(const int max_devices)
+{
+    double levels = log2(max_devices);
+    return (levels > int(levels)) ? levels + 1 : levels;
+}
+
 /* Returns 4 octets address. mode 0: first address of the network, mode 1: last address */
 const string complete_address(const string base_address, const string path, const bool mode)
 {

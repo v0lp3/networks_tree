@@ -91,6 +91,9 @@ private:
 				node->net->last_addr = bin_to_ip(complete_address(base_addr, path, 1));
 				node->net->devices = new netface *[get_bound(node->net->prefix)]; // array positon represents the interface
 
+				for (int i = 0; i < get_bound(node->net->prefix); i++)
+					node->net->devices[i] = NULL;
+
 				node->defined = true; // avoid multiple-redefinition
 
 				index_subnet(node->net); // avoid research in entire tree
@@ -136,11 +139,11 @@ public:
 	}
 
 	/* Allocates address space in network tree  */
-	const int add_subnetwork(const int max_hosts, const string net_name)
+	const int add_subnetwork(const int max_devices, const string net_name)
 	{
 		if (get_net_by_name(net_name) == NULL)
 		{
-			const int level = log2(max_hosts) + 1;
+			const int level = get_total_level(max_devices);
 			bool allocated = false; // multi-allocation avoidance
 
 			_add_subnetwork(root, level, net_name, allocated);
@@ -199,14 +202,18 @@ public:
 
 		else if (get_all_routers(sel_subnet)->empty() && !router)
 			return -3;
-
 		else
 		{
 			int interface; // avoid broadcast address
-
+			int attempts = 0;
 			do
-				interface = rand() % (get_bound(sel_subnet->prefix) - 1);
-			while (sel_subnet->devices[interface] != NULL); // the address is free
+			{
+				if (attempts++ > get_bound(sel_subnet->prefix))
+					return -4;
+
+				interface = rand() % (get_bound(sel_subnet->prefix) - 1); // last address is broadcast
+
+			} while (sel_subnet->devices[interface] != NULL); // the address is free
 
 			// generation of a valid ipv4 address in the range
 			string address = get_bin_prefix(sel_subnet->first_addr, sel_subnet->prefix) + get_fixed_length(interface, MAX_ADDR_LEN - sel_subnet->prefix);
