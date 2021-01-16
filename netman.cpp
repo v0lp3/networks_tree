@@ -88,7 +88,7 @@ private:
 				node->net->prefix = prefix_len + path.length();
 				node->net->first_addr = bin_to_ip(complete_address(base_addr, path, 0));
 				node->net->last_addr = bin_to_ip(complete_address(base_addr, path, 1));
-				node->net->devices = new netface *[int(pow(2, MAX_ADDR_LEN - node->net->prefix))]; // array positon represents the interface
+				node->net->devices = new netface *[get_bound(node->net->prefix)]; // array positon represents the interface
 
 				node->defined = true; // avoid multiple-redefinition
 
@@ -126,7 +126,7 @@ public:
 	/* Returns device by name */
 	netface *get_dev_by_name(const string dev_name, const subnet *net)
 	{
-		for (int i = 0; i < pow(2, MAX_ADDR_LEN - net->prefix); i++)
+		for (int i = 0; i < get_bound(net->prefix); i++)
 		{
 			if (net->devices[i] && net->devices[i]->name == dev_name)
 				return net->devices[i];
@@ -164,13 +164,12 @@ public:
 		return subnetworks;
 	}
 
-	vector<netface *> *get_routers(subnet *net)
+	/* Returns vector of all routers in subnetwork */
+	vector<netface *> *get_all_routers(const subnet *net)
 	{
 		vector<netface *> *routers = new vector<netface *>();
 
-		int bound = MAX_ADDR_LEN - net->prefix;
-
-		for (int i = 0; i < pow(2, bound); i++)
+		for (int i = 0; i < get_bound(net->prefix); i++)
 		{
 			if (net->devices[i] && net->devices[i]->router)
 				routers->push_back(net->devices[i]);
@@ -197,27 +196,24 @@ public:
 		else if (get_dev_by_name(dev_name, sel_subnet) != NULL) //device already exists
 			return -2;
 
-		else if (get_routers(sel_subnet)->empty() && !router)
+		else if (get_all_routers(sel_subnet)->empty() && !router)
 			return -3;
 
 		else
 		{
-
-			const int bound = pow(2, MAX_ADDR_LEN - sel_subnet->prefix);
 			int interface; // avoid broadcast address
 
 			do
-				interface = rand() % (bound - 1);
-			while (sel_subnet->devices[interface] != NULL);
-
-			std::cout << interface << std::endl;
+				interface = rand() % (get_bound(sel_subnet->prefix) - 1);
+			while (sel_subnet->devices[interface] != NULL); // the address is free
 
 			// generation of a valid ipv4 address in the range
-			sel_subnet->devices[interface] = init_netface(router, dev_name, bin_to_ip(get_bin_prefix(sel_subnet->first_addr, sel_subnet->prefix) + complete_octet(interface, MAX_ADDR_LEN - sel_subnet->prefix)));
+			string address = get_bin_prefix(sel_subnet->first_addr, sel_subnet->prefix) + get_fixed_length(interface, MAX_ADDR_LEN - sel_subnet->prefix);
+			sel_subnet->devices[interface] = init_netface(router, dev_name, bin_to_ip(address));
 
-			if (router == false)
+			if (router == false) //set gateway automatically with random router in subnet
 			{
-				vector<netface *> routers = *get_routers(sel_subnet);
+				vector<netface *> routers = *get_all_routers(sel_subnet);
 				sel_subnet->devices[interface]->gateway = routers[rand() % routers.size()]->address;
 			}
 

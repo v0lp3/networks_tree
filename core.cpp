@@ -123,8 +123,10 @@ private:
     {
         print_line(dev->name + ':', "", GRCLR);
         print_line("\taddress:", dev->address, REDCLR);
+
         if (dev->router)
             print_line("\ttype:", "\trouter", REDCLR);
+
         else
         {
             print_line("\tgateway:", dev->gateway, REDCLR);
@@ -164,16 +166,16 @@ private:
     /* Adds new subnet to networks tree */
     const void add_subnet()
     {
-        int max_hosts;
+        int max_devices;
         string net_name;
 
         cout << "Input subnet name: ";
         cin >> net_name;
 
-        cout << "Input max hosts: ";
-        cin >> max_hosts;
+        cout << "Input max devices: ";
+        cin >> max_devices;
 
-        if (tree->add_subnetwork(max_hosts, net_name) == -1)
+        if (tree->add_subnetwork(max_devices, net_name) == -1)
             print_line("error:", "subnet name already in use", REDBG);
     }
 
