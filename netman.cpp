@@ -53,6 +53,7 @@ private:
 			{
 				node->net = new subnet;
 				node->net->name = net_name;
+				node->net->devices = NULL;
 				allocated = true;
 			}
 
@@ -88,7 +89,10 @@ private:
 				node->net->prefix = prefix_len + path.length();
 				node->net->first_addr = bin_to_ip(complete_address(base_addr, path, 0));
 				node->net->last_addr = bin_to_ip(complete_address(base_addr, path, 1));
-				node->net->devices = new netface *[int(pow(2, MAX_ADDR_LEN - node->net->prefix))]; // array positon represents the interface
+				node->net->devices = new netface *[get_bound(node->net->prefix)]; // array positon represents the interface
+
+				for (int i = 0; i < get_bound(node->net->prefix); i++)
+					node->net->devices[i] = NULL;
 
 				node->defined = true; // avoid multiple-redefinition
 
@@ -126,7 +130,7 @@ public:
 	/* Returns device by name */
 	netface *get_dev_by_name(const string dev_name, const subnet *net)
 	{
-		for (int i = 0; i < pow(2, MAX_ADDR_LEN - net->prefix); i++)
+		for (int i = 0; i < get_bound(net->prefix); i++)
 		{
 			if (net->devices[i] && net->devices[i]->name == dev_name)
 				return net->devices[i];
@@ -135,11 +139,11 @@ public:
 	}
 
 	/* Allocates address space in network tree  */
-	const int add_subnetwork(const int max_hosts, const string net_name)
+	const int add_subnetwork(const int max_devices, const string net_name)
 	{
 		if (get_net_by_name(net_name) == NULL)
 		{
-			const int level = log2(max_hosts) + 1;
+			const int level = get_total_level(max_devices);
 			bool allocated = false; // multi-allocation avoidance
 
 			_add_subnetwork(root, level, net_name, allocated);
@@ -159,9 +163,23 @@ public:
 	}
 
 	/* Returns vector of subnetworks pointers*/
-	const vector<subnet *> *get_all()
+	const vector<subnet *> *get_all_nets()
 	{
 		return subnetworks;
+	}
+
+	/* Returns vector of all routers in subnetwork */
+	vector<netface *> *get_all_routers(const subnet *net)
+	{
+		vector<netface *> *routers = new vector<netface *>();
+
+		for (int i = 0; i < get_bound(net->prefix); i++)
+		{
+			if (net->devices[i] && net->devices[i]->router)
+				routers->push_back(net->devices[i]);
+		}
+
+		return routers;
 	}
 
 	/* Deletes all subnetworks */
@@ -172,21 +190,41 @@ public:
 	}
 
 	/* Add devices to the subnetwork */
-	const int add_device(const string net_name, const string dev_name, const bool router)
+	const int attach_device(const string net_name, const string dev_name, const bool router)
 	{
-		const subnet *sel_subnet = get_net_by_name(net_name);
+		subnet *sel_subnet = get_net_by_name(net_name);
 
 		if (sel_subnet == NULL) // subnet not exists
 			return -1;
 
-		if (get_dev_by_name(dev_name, sel_subnet) != NULL) //device already exists
+		else if (get_dev_by_name(dev_name, sel_subnet) != NULL) //device already exists
 			return -2;
 
-		const int bound = pow(2, MAX_ADDR_LEN - sel_subnet->prefix);
-		const int interface = rand() % (bound - 1); // avoid broadcast address
+		else if (get_all_routers(sel_subnet)->empty() && !router)
+			return -3;
+		else
+		{
+			int interface; // avoid broadcast address
+			int attempts = 0;
+			do
+			{
+				if (attempts++ > get_bound(sel_subnet->prefix))
+					return -4;
 
-		// generation of a valid ipv4 address in the range
-		sel_subnet->devices[interface] = init_netface(router, dev_name, bin_to_ip(complete_address(get_bin_prefix(sel_subnet->first_addr, sel_subnet->prefix), int_to_bin(interface), 0)));
+				interface = rand() % (get_bound(sel_subnet->prefix) - 1); // last address is broadcast
+
+			} while (sel_subnet->devices[interface] != NULL); // the address is free
+
+			// generation of a valid ipv4 address in the range
+			string address = get_bin_prefix(sel_subnet->first_addr, sel_subnet->prefix) + get_fixed_length(interface, MAX_ADDR_LEN - sel_subnet->prefix);
+			sel_subnet->devices[interface] = init_netface(router, dev_name, bin_to_ip(address));
+
+			if (router == false) //set gateway automatically with random router in subnet
+			{
+				vector<netface *> routers = *get_all_routers(sel_subnet);
+				sel_subnet->devices[interface]->gateway = routers[rand() % routers.size()]->address;
+			}
+		}
 		return 0;
 	}
 };

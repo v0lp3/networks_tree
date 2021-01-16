@@ -60,17 +60,17 @@ const string int_to_bin(int integer)
 }
 
 /* Converts base 10 to fixed-length base 2 */
-const string complete_octet(const int integer)
+const string get_fixed_length(const int integer, int fixed_length)
 {
-    string octet = int_to_bin(integer); // es. 10 => |1010| < 8
+    string bits = int_to_bin(integer); // es. 10 => |1010| < 8
 
     // 0 => 00000000
-    int bound = 8 - octet.length();
+    int bound = fixed_length - bits.length();
 
     for (int i = 0; i < bound; i++)
-        octet = '0' + octet;
+        bits = '0' + bits;
 
-    return octet;
+    return bits;
 }
 
 /* Returns 4 binary octets */
@@ -84,23 +84,36 @@ const string ip_to_bin(const string address)
     {
         if (address[i] == '.')
         {
-            bits += complete_octet(parse_int(tmp_number));
+            bits += get_fixed_length(parse_int(tmp_number), 8); // octet
             tmp_number = "";
         }
         else
             tmp_number += address[i];
     }
 
-    bits += complete_octet(parse_int(tmp_number));
+    bits += get_fixed_length(parse_int(tmp_number), 8);
 
     return (bits.length() == MAX_ADDR_LEN) ? bits : ERROR_LEN;
+}
+
+/* Returns number of address in network */
+const int get_bound(const int prefix_length)
+{
+    return pow(2, MAX_ADDR_LEN - prefix_length);
 }
 
 /* Returns ip address prefix in base 2*/
 const string get_bin_prefix(const string address, const int prefix_len)
 {
-    string addr_bin = ip_to_bin(address);
+    string addr_bin = ip_to_bin(address); // conversion to binary
     return addr_bin.substr(0, prefix_len);
+}
+
+/* Returns the minimum number of levels needed */
+const int get_total_level(const int max_devices)
+{
+    double levels = log2(max_devices);
+    return (levels > int(levels)) ? levels + 1 : levels;
 }
 
 /* Returns 4 octets address. mode 0: first address of the network, mode 1: last address */
