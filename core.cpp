@@ -112,7 +112,7 @@ private:
         cout << "Input max devices: ";
         cin >> max_devices;
 
-        if (tree->get_nets_count() > 0)
+        if (tree->get_all_nets()->size() > 0)
         {
             cout << "Input subnet domain name: ";
             cin >> domain_name;

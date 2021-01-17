@@ -178,12 +178,6 @@ public:
 		return subnetworks;
 	}
 
-	/* Returns numbers of subnetworks created */
-	const int get_nets_count()
-	{
-		return subnetworks->size();
-	}
-
 	/* Returns vector of all routers in subnetwork */
 	vector<netface *> *get_all_routers(const subnet *net)
 	{
@@ -215,6 +209,7 @@ public:
 		return 1;
 	}
 
+	/* Sets subnetwork level*/
 	const int set_net_level(const string net_name, int level)
 	{
 		subnet *net = get_net_by_name(net_name);
@@ -253,12 +248,12 @@ public:
 			bool allocated = false; // multi-allocation avoidance
 			subnet *domain = get_net_by_name(domain_name);
 
-			if (get_nets_count() == 0 || (domain && get_dev_by_name(gateway_name, domain)))
+			if (get_all_nets()->size() == 0 || (domain && get_dev_by_name(gateway_name, domain)))
 			{
 				_add_subnet(root, level, net_name, allocated);
 				set_netmasks();
 
-				if (get_nets_count() > 1)
+				if (get_all_nets()->size() > 1)
 				{
 					set_net_level(net_name, domain->level + 1);
 					return set_gateway(net_name, gateway_name, domain);
@@ -290,11 +285,11 @@ public:
 		else
 		{
 			int interface; // avoid broadcast address
-			int attempts = 0;
+			int attempt = 0;
 
 			do
 			{
-				if (attempts++ > netutil::get_bound(sel_subnet->prefix))
+				if (attempt++ > netutil::get_bound(sel_subnet->prefix))
 					return -4;
 
 				interface = rand() % (netutil::get_bound(sel_subnet->prefix) - 1); // last address is broadcast
@@ -305,7 +300,7 @@ public:
 			string address = netutil::get_bin_prefix(sel_subnet->first_addr, sel_subnet->prefix) + netutil::get_fixed_length(interface, MAX_ADDR_LEN - sel_subnet->prefix);
 			sel_subnet->addressable[interface] = init_netface(router, dev_name, sel_subnet, netutil::bin_to_ip(address));
 
-			if (router && sel_subnet->gateway.second == NULL)
+			if (router && sel_subnet->gateway.second == NULL) // set default gateway
 				sel_subnet->gateway.second = sel_subnet->addressable[interface];
 
 			if (router == false) //set gateway automatically with random router in subnet
@@ -318,6 +313,8 @@ public:
 	}
 
 	/// remover ///
+
+	/* Remove devices in subnetwork by name */
 	int remove_dev_by_name(string dev_name, string net_name)
 	{
 		subnet *net = get_net_by_name(net_name);
@@ -337,6 +334,7 @@ public:
 		return -2;
 	}
 
+	/* Remove subnetworks by name */
 	int remove_net_by_name(string net_name)
 	{
 		int i = 0;

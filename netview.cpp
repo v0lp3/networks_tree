@@ -1,20 +1,20 @@
-using namespace std;
+using std::string;
 
 class netview
 {
 
 public:
     /* Prints formatted strings */
-    static ostream &format_output(const string line, const string style)
+    static std::ostream &format_output(const string line, const string style)
     {
-        return cout << style << line << RSCLR;
+        return std::cout << style << line << RSCLR;
     }
 
     /* Print formatted line message */
     static const void print_line(const string attribute, const string value, const string bg)
     {
         format_output(attribute, bg);
-        format_output('\t' + value, GRCLR) << endl;
+        format_output('\t' + value, GRCLR) << std::endl;
     }
 
     /* Prints system info message */
