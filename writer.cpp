@@ -65,8 +65,8 @@ public:
             *file.first << "iface " << interface_name << " inet static" << endl;
             *file.first << "address " << file.second.first->address << "/" << file.second.second << endl;
 
-            if (file.second.first->gateway.length() > 0)
-                *file.first << "gateway " << file.second.first->gateway << endl;
+            if (file.second.first->gateway && file.second.first->gateway->address.length() > 0)
+                *file.first << "gateway " << file.second.first->gateway->address << endl;
         }
     }
 };

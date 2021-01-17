@@ -54,7 +54,7 @@ private:
 				node->net = new subnet;
 				node->net->name = net_name;
 				node->net->devices = NULL;
-				node->net->router = NULL;
+				node->net->main_router = NULL;
 				allocated = true;
 			}
 
@@ -240,17 +240,17 @@ public:
 			string address = get_bin_prefix(sel_subnet->first_addr, sel_subnet->prefix) + get_fixed_length(interface, MAX_ADDR_LEN - sel_subnet->prefix);
 			sel_subnet->devices[interface] = init_netface(router, dev_name, bin_to_ip(address));
 
-			if (router && sel_subnet->router == NULL)
-				sel_subnet->router = sel_subnet->devices[interface];
+			if (router && sel_subnet->main_router == NULL)
+				sel_subnet->main_router = sel_subnet->devices[interface];
 
 			if (router == false) //set gateway automatically with random router in subnet
 			{
 				vector<netface *> routers = *get_all_routers(sel_subnet);
-				sel_subnet->devices[interface]->gateway = routers[rand() % routers.size()]->address;
+				sel_subnet->devices[interface]->gateway = routers[rand() % routers.size()];
 			}
 
-			else if (sel_subnet->router != sel_subnet->devices[interface])
-				sel_subnet->devices[interface]->gateway = sel_subnet->router->address;
+			else if (sel_subnet->main_router != sel_subnet->devices[interface])
+				sel_subnet->devices[interface]->gateway = sel_subnet->main_router;
 		}
 		return 0;
 	}

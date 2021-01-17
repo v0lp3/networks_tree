@@ -9,19 +9,21 @@
 #define GRCLR "\033[1;32m"
 #define REDCLR "\033[1;31m"
 
-typedef struct
+struct interface
 {
     bool router;
     std::string name;
     std::string address;
-    std::string gateway;
-} netface;
+    struct interface *gateway;
+};
+
+typedef interface netface;
 
 typedef struct
 {
     int prefix;
     netface **devices;
-    netface *router;
+    netface *main_router;
     std::string name;
     std::string first_addr;
     std::string last_addr;
