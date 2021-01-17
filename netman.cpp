@@ -54,6 +54,7 @@ private:
 				node->net = new subnet;
 				node->net->name = net_name;
 				node->net->devices = NULL;
+				node->net->router = NULL;
 				allocated = true;
 			}
 
@@ -138,6 +139,19 @@ public:
 		return NULL;
 	}
 
+	vector<netface *> get_all_devices(subnet *net)
+	{
+
+		vector<netface *> *devices = new vector<netface *>();
+
+		for (int i = 0; i < get_bound(net->prefix); i++)
+		{
+			if (net->devices[i])
+				devices->push_back(net->devices[i]);
+		}
+		return *devices;
+	}
+
 	/* Allocates address space in network tree  */
 	const int add_subnetwork(const int max_devices, const string net_name)
 	{
@@ -166,6 +180,12 @@ public:
 	const vector<subnet *> *get_all_nets()
 	{
 		return subnetworks;
+	}
+
+	/* Returns numbers of subnetworks created */
+	const int get_nets_count()
+	{
+		return subnetworks->size();
 	}
 
 	/* Returns vector of all routers in subnetwork */
@@ -206,6 +226,7 @@ public:
 		{
 			int interface; // avoid broadcast address
 			int attempts = 0;
+
 			do
 			{
 				if (attempts++ > get_bound(sel_subnet->prefix))
@@ -219,11 +240,17 @@ public:
 			string address = get_bin_prefix(sel_subnet->first_addr, sel_subnet->prefix) + get_fixed_length(interface, MAX_ADDR_LEN - sel_subnet->prefix);
 			sel_subnet->devices[interface] = init_netface(router, dev_name, bin_to_ip(address));
 
+			if (router && sel_subnet->router == NULL)
+				sel_subnet->router = sel_subnet->devices[interface];
+
 			if (router == false) //set gateway automatically with random router in subnet
 			{
 				vector<netface *> routers = *get_all_routers(sel_subnet);
 				sel_subnet->devices[interface]->gateway = routers[rand() % routers.size()]->address;
 			}
+
+			else if (sel_subnet->router != sel_subnet->devices[interface])
+				sel_subnet->devices[interface]->gateway = sel_subnet->router->address;
 		}
 		return 0;
 	}

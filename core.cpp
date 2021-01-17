@@ -86,6 +86,7 @@ private:
         print_line("add   ", "Add new subnetwork", BLUBG);
         print_line("clear ", "Delete all subnetworks", BLUBG);
         print_line("assign", "Popolate subnetwork", BLUBG);
+        print_line("write", "Generate all interfaces file", BLUBG);
         cout << "\n";
     }
 
@@ -130,14 +131,10 @@ private:
             print_line(dev->name + ':', "", GRCLR);
             print_line("\taddress:", dev->address, REDCLR);
 
-            if (dev->router)
-                print_line("\ttype:", "\trouter", REDCLR);
+            (dev->router) ? print_line("\ttype:", "\trouter", REDCLR) : print_line("\ttype:", "\thost", REDCLR);
 
-            else
-            {
+            if (dev->gateway.length() > 0)
                 print_line("\tgateway:", dev->gateway, REDCLR);
-                print_line("\ttype:", "\thost", REDCLR);
-            }
         }
     }
 
@@ -190,6 +187,11 @@ private:
         print_line("system:", "all subnetworks deleted", BLUBG);
     }
 
+    const void write_command()
+    {
+        print_line("system: ", "all files writed", BLUBG);
+    }
+
 public:
     /* Returns -1 if initialization fail */
     const int init()
@@ -198,8 +200,14 @@ public:
         return init_tree();
     }
 
+    /* Returns tree instance */
+    netman *get_tree_instance()
+    {
+        return tree;
+    }
+
     /* Parse user input */
-    const void execute_command()
+    const int execute_command()
     {
         print_commands();
         while (1)
@@ -223,8 +231,15 @@ public:
             else if (command == "assign")
                 assign_device();
 
+            else if (command == "write")
+            {
+                write_command();
+                return 1;
+            }
+
             else
                 print_line("error:", "invalid command", REDBG);
         }
+        return 0;
     }
 };

@@ -21,6 +21,7 @@ typedef struct
 {
     int prefix;
     netface **devices;
+    netface *router;
     std::string name;
     std::string first_addr;
     std::string last_addr;
