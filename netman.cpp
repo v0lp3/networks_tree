@@ -208,10 +208,11 @@ public:
 	}
 
 	/* Deletes all subnetworks */
-	const void set_subnets_empty()
+	const int set_subnets_empty()
 	{
 		root = init_netbitn(MAX_ADDR_LEN - prefix_len);
 		subnetworks->clear();
+		return 1;
 	}
 
 	const int set_net_level(const string net_name, int level)
