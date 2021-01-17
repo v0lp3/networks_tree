@@ -178,20 +178,6 @@ public:
 		return subnetworks;
 	}
 
-	/* Returns vector of all routers in subnetwork */
-	vector<netface *> *get_all_routers(const subnet *net)
-	{
-		vector<netface *> *routers = new vector<netface *>();
-
-		for (int i = 0; i < netutil::get_bound(net->prefix); i++)
-		{
-			if (net->addressable[i] && net->addressable[i]->router)
-				routers->push_back(net->addressable[i]);
-		}
-
-		return routers;
-	}
-
 	/// setter ///
 
 	/* Sets subnetworks info in the structures*/
@@ -304,10 +290,7 @@ public:
 				sel_subnet->gateway.second = sel_subnet->addressable[interface];
 
 			if (router == false) //set gateway automatically with random router in subnet
-			{
-				vector<netface *> routers = *get_all_routers(sel_subnet);
 				sel_subnet->addressable[interface]->gateway = sel_subnet->gateway.second;
-			}
 		}
 		return 0;
 	}
