@@ -1,5 +1,6 @@
 #define MAX_ADDR_LEN 32
 #define ERROR_LEN "BITS LENGTH ERROR"
+#define DEFROUTER "router0"
 
 //output style
 #define RSCLR "\033[0m"
@@ -14,20 +15,24 @@ struct interface
     bool router;
     std::string name;
     std::string address;
+    std::string netname;
     struct interface *gateway;
 };
 
 typedef interface netface;
 
-typedef struct
+struct net
 {
     int prefix;
-    netface **devices;
-    netface *main_router;
+    int level;
+    netface **addressable;
+    std::pair<netface *, netface *> *gateway;
     std::string name;
     std::string first_addr;
     std::string last_addr;
-} subnet;
+};
+
+typedef net subnet;
 
 struct bitnode
 {

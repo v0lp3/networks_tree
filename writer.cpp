@@ -9,6 +9,7 @@ private:
 
     vector<pair<ofstream *, pair<netface *, int>>> *devices;
 
+    /* Creates one folder for each lan */
     const void init_dir()
     {
         for (auto &net : *tree->get_all_nets())
@@ -18,6 +19,7 @@ private:
         }
     }
 
+    /* Creates one file for each device */
     const void init_files()
     {
         devices = new vector<pair<ofstream *, pair<netface *, int>>>;
@@ -35,6 +37,7 @@ private:
         }
     }
 
+    /* Writes loopback lines */
     const void write_loopback(ofstream *file)
     {
 
@@ -53,6 +56,7 @@ public:
         init_files();
     }
 
+    /* Writes configuration interface file */
     const void write_interface(const string interface_name, bool include_loopback)
     {
 
