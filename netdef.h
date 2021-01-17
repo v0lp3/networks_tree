@@ -26,7 +26,7 @@ struct net
     int prefix;
     int level;
     netface **addressable;
-    std::pair<netface *, netface *> *gateway;
+    std::pair<netface *, netface *> gateway;
     std::string name;
     std::string first_addr;
     std::string last_addr;

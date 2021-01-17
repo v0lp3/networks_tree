@@ -50,6 +50,12 @@ private:
     {
         cout << "\n";
 
+        if (net->gateway.first)
+        {
+            print_gateway_ancient(tree->get_net_by_gateway(net->gateway.first->name, net->level));
+            format_output(net->gateway.first->name, WHIBG) << " >> "; // router name
+        }
+
         format_output(net->name, WHIBG) << endl; // subnetwork name
 
         // range of address available
@@ -68,6 +74,14 @@ private:
     {
         format_output(attribute, bg);
         format_output('\t' + value, GRCLR) << endl;
+    }
+
+    const void print_gateway_ancient(subnet *net)
+    {
+        if (net && net->gateway.first)
+            print_gateway_ancient(tree->get_net_by_gateway(net->gateway.first->name, net->level));
+
+        format_output(net->name, WHIBG) << " >> ";
     }
 
     /// Commands ///
@@ -101,8 +115,6 @@ private:
         if (count == 0)
             current_level++;
 
-        count = (count + 1) % current_level;
-
         int max_devices;
         string net_name;
         string gateway_name;
@@ -115,19 +127,21 @@ private:
 
         if (current_level > 1)
         {
-            cout << "Input gateway net name: ";
+            cout << "Input gateway router name: ";
             cin >> gateway_name;
         }
 
-        if (current_level == 0 || tree->check_level(gateway_name, current_level))
+        if (current_level == 1 || tree->get_net_by_gateway(gateway_name, current_level) != NULL)
         {
-            if (tree->add_subnetwork(max_devices, current_level, net_name) == -1)
+            if (tree->add_subnet(max_devices, current_level, net_name, gateway_name, current_level) == -1)
                 print_line("error:", "subnet name already in use", REDBG);
             else
                 tree->add_dev(net_name, DEFROUTER, true);
         }
         else
             print_line("error:", "gateway net unavailable", REDBG);
+
+        count = (count + 1) % current_level;
     }
 
     /* Deletes all subnetworks in the network */
@@ -182,12 +196,6 @@ private:
         }
     }
 
-    /* Writes configuration files */
-    const void write_command()
-    {
-        print_line("system: ", "all files writed", BLUBG);
-    }
-
     /* Initialize networks tree*/
     const int init_tree()
     {
@@ -208,14 +216,6 @@ private:
 
         return 0;
     }
-
-    // const void print_gateway_ancient(subnet *net)
-    // {
-    //     if (net && net->gateway)
-    //         print_gateway_ancient(net->gateway);
-
-    //     format_output(net->name, WHIBG) << " >> ";
-    // }
 
 public:
     core()
@@ -271,7 +271,7 @@ public:
 
             else if (command == "write")
             {
-                write_command();
+                print_line("system: ", "all files writed", BLUBG);
                 return 1;
             }
 

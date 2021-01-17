@@ -141,15 +141,15 @@ public:
     /* Parses address with mask */
     static const void parse_address_input(string &range, int &prefix)
     {
-        string tmp; // entire input
-        cin >> tmp;
+        string input; // entire input
+        cin >> input;
 
-        for (int i = 0; i < tmp.length(); i++)
+        for (int i = 0; i < input.length(); i++)
         {
-            if (tmp[i] == '/')
+            if (input[i] == '/')
             {
-                range = tmp.substr(0, i);
-                prefix = stoi(tmp.substr(i + 1, tmp.length()));
+                range = input.substr(0, i);
+                prefix = stoi(input.substr(i + 1, input.length()));
             }
         }
     }

@@ -55,7 +55,7 @@ private:
 	/// Service procedures ///
 
 	/* Service procedure to allocate subnet*/
-	const void _add_subnetwork(netbitn *node, const int level, const int netlevel, const string net_name, bool &allocated)
+	const void _add_subnet(netbitn *node, const int level, const int netlevel, const string net_name, bool &allocated)
 	{
 		if (node && node->net == NULL && !(allocated || node->level < level))
 		{
@@ -66,7 +66,7 @@ private:
 				node->net->name = net_name;
 				node->net->level = netlevel;
 				node->net->addressable = NULL;
-				node->net->gateway = NULL;
+				node->net->gateway = std::make_pair((netface *)NULL, (netface *)NULL);
 				allocated = true;
 			}
 
@@ -75,12 +75,12 @@ private:
 				if (node->sx == NULL)
 					node->sx = init_netbitn(node->level - 1);
 
-				_add_subnetwork(node->sx, level, netlevel, net_name, allocated);
+				_add_subnet(node->sx, level, netlevel, net_name, allocated);
 
 				if (node->dx == NULL)
 					node->dx = init_netbitn(node->level - 1);
 
-				_add_subnetwork(node->dx, level, netlevel, net_name, allocated);
+				_add_subnet(node->dx, level, netlevel, net_name, allocated);
 			}
 		}
 	}
@@ -215,18 +215,30 @@ public:
 		subnetworks->clear();
 	}
 
+	/* Set upper level gateway router */
+	const void set_gateway(const string net_name, const string gateway_name, int current_level)
+	{
+		subnet *net = get_net_by_name(net_name);
+		netface *gateway = get_dev_by_name(gateway_name, get_net_by_gateway(gateway_name, current_level));
+
+		net->gateway.first = gateway;
+	}
+
 	/// adder ///
 
 	/* Allocates address space in network tree  */
-	const int add_subnetwork(const int max_addressable, const int netlevel, const string net_name)
+	const int add_subnet(const int max_addressable, const int netlevel, const string net_name, const string gateway_name, int current_level)
 	{
 		if (get_net_by_name(net_name) == NULL)
 		{
 			const int level = netutil::get_total_level(max_addressable);
 			bool allocated = false; // multi-allocation avoidance
 
-			_add_subnetwork(root, level, netlevel, net_name, allocated);
+			_add_subnet(root, level, netlevel, net_name, allocated);
 			set_netmasks();
+
+			if (current_level > 1)
+				set_gateway(net_name, gateway_name, current_level);
 
 			return 0;
 		}
@@ -263,8 +275,8 @@ public:
 			string address = netutil::get_bin_prefix(sel_subnet->first_addr, sel_subnet->prefix) + netutil::get_fixed_length(interface, MAX_ADDR_LEN - sel_subnet->prefix);
 			sel_subnet->addressable[interface] = init_netface(router, dev_name, sel_subnet, netutil::bin_to_ip(address));
 
-			if (router && sel_subnet->gateway->second == NULL)
-				sel_subnet->gateway->second = sel_subnet->addressable[interface];
+			if (router && sel_subnet->gateway.second == NULL)
+				sel_subnet->gateway.second = sel_subnet->addressable[interface];
 
 			if (router == false) //set gateway automatically with random router in subnet
 			{
@@ -272,8 +284,8 @@ public:
 				sel_subnet->addressable[interface]->gateway = routers[rand() % routers.size()];
 			}
 
-			else if (sel_subnet->gateway->second != sel_subnet->addressable[interface])
-				sel_subnet->addressable[interface]->gateway = sel_subnet->gateway->second;
+			else if (sel_subnet->gateway.second != sel_subnet->addressable[interface])
+				sel_subnet->addressable[interface]->gateway = sel_subnet->gateway.second;
 		}
 		return 0;
 	}
