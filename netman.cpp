@@ -55,7 +55,7 @@ private:
 	/// Service procedures ///
 
 	/* Service procedure to allocate subnet*/
-	const void _add_subnet(netbitn *node, const int level, const int netlevel, const string net_name, bool &allocated)
+	const void _add_subnet(netbitn *node, const int level, const string net_name, bool &allocated)
 	{
 		if (node && node->net == NULL && !(allocated || node->level < level))
 		{
@@ -64,7 +64,6 @@ private:
 			{
 				node->net = new subnet;
 				node->net->name = net_name;
-				node->net->level = netlevel;
 				node->net->addressable = NULL;
 				node->net->gateway = std::make_pair((netface *)NULL, (netface *)NULL);
 				allocated = true;
@@ -75,12 +74,12 @@ private:
 				if (node->sx == NULL)
 					node->sx = init_netbitn(node->level - 1);
 
-				_add_subnet(node->sx, level, netlevel, net_name, allocated);
+				_add_subnet(node->sx, level, net_name, allocated);
 
 				if (node->dx == NULL)
 					node->dx = init_netbitn(node->level - 1);
 
-				_add_subnet(node->dx, level, netlevel, net_name, allocated);
+				_add_subnet(node->dx, level, net_name, allocated);
 			}
 		}
 	}
@@ -136,7 +135,7 @@ public:
 	}
 
 	/* Returns device by name and subnet */
-	netface *get_dev_by_name(const string dev_name, const subnet *net)
+	netface *get_dev_by_name(const string dev_name, subnet *net)
 	{
 		for (int i = 0; i < netutil::get_bound(net->prefix); i++)
 		{
@@ -215,32 +214,62 @@ public:
 		subnetworks->clear();
 	}
 
-	/* Set upper level gateway router */
-	const void set_gateway(const string net_name, const string gateway_name, int current_level)
+	const int set_net_level(const string net_name, int level)
 	{
 		subnet *net = get_net_by_name(net_name);
-		netface *gateway = get_dev_by_name(gateway_name, get_net_by_gateway(gateway_name, current_level));
 
-		net->gateway.first = gateway;
+		if (net)
+		{
+			net->level = level;
+			return 0;
+		}
+
+		return -1;
+	}
+
+	/* Set upper level gateway router */
+	const int set_gateway(const string net_name, const string gateway_name, subnet *domain)
+	{
+		subnet *net = get_net_by_name(net_name);
+		netface *gateway = get_dev_by_name(gateway_name, domain);
+
+		if (net && gateway)
+		{
+			net->gateway.first = gateway;
+			return 0;
+		}
+		return -2;
 	}
 
 	/// adder ///
 
 	/* Allocates address space in network tree  */
-	const int add_subnet(const int max_addressable, const int netlevel, const string net_name, const string gateway_name, int current_level)
+	const int add_subnet(const int max_addressable, const string net_name, const string gateway_name, const string domain_name)
 	{
 		if (get_net_by_name(net_name) == NULL)
 		{
-			const int level = netutil::get_total_level(max_addressable);
+			const int level = netutil::get_total_level(max_addressable + 1);
 			bool allocated = false; // multi-allocation avoidance
+			subnet *domain = get_net_by_name(domain_name);
 
-			_add_subnet(root, level, netlevel, net_name, allocated);
-			set_netmasks();
+			if (get_nets_count() == 0 || (domain && get_dev_by_name(gateway_name, domain)))
+			{
+				_add_subnet(root, level, net_name, allocated);
+				set_netmasks();
 
-			if (current_level > 1)
-				set_gateway(net_name, gateway_name, current_level);
+				if (get_nets_count() > 1)
+				{
+					set_net_level(net_name, domain->level + 1);
+					return set_gateway(net_name, gateway_name, domain);
+				}
 
-			return 0;
+				else
+					set_net_level(net_name, 1);
+
+				return 0;
+			}
+
+			return -2;
 		}
 
 		return -1;
@@ -281,12 +310,46 @@ public:
 			if (router == false) //set gateway automatically with random router in subnet
 			{
 				vector<netface *> routers = *get_all_routers(sel_subnet);
-				sel_subnet->addressable[interface]->gateway = routers[rand() % routers.size()];
-			}
-
-			else if (sel_subnet->gateway.second != sel_subnet->addressable[interface])
 				sel_subnet->addressable[interface]->gateway = sel_subnet->gateway.second;
+			}
 		}
 		return 0;
+	}
+
+	/// remover ///
+	int remove_dev_by_name(string dev_name, string net_name)
+	{
+		subnet *net = get_net_by_name(net_name);
+
+		if (net)
+		{
+			for (int i = 0; i < netutil::get_bound(net->prefix); i++)
+			{
+				if (net->addressable[i] && net->addressable[i]->name == dev_name)
+				{
+					net->addressable[i] = NULL;
+					return 0;
+				}
+			}
+			return -1;
+		}
+		return -2;
+	}
+
+	int remove_net_by_name(string net_name)
+	{
+		int i = 0;
+
+		for (auto &net : *subnetworks)
+		{
+			if (net->name == net_name)
+			{
+				subnetworks->erase(subnetworks->begin() + i);
+				return 0;
+			}
+
+			i++;
+		}
+		return -1;
 	}
 };

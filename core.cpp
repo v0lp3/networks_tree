@@ -64,6 +64,8 @@ private:
 
         format_output("mask: ", GRCLR) << net->prefix << endl; // total prefix length
 
+        format_output("level: ", GRCLR) << net->level << endl; // total prefix length
+
         // list of all devices attached
         for (int i = 0; i < netutil::get_bound(net->prefix); i++)
             print_dev(net->addressable[i]);
@@ -105,6 +107,7 @@ private:
         print_line("add   ", "Add new subnetwork", BLUBG);
         print_line("clear ", "Delete all subnetworks", BLUBG);
         print_line("assign", "Popolate subnetwork", BLUBG);
+        print_line("remove", "Remove device e/o subnetwork", BLUBG);
         print_line("write ", "Generate all interfaces file", BLUBG);
         cout << "\n";
     }
@@ -118,6 +121,7 @@ private:
         int max_devices;
         string net_name;
         string gateway_name;
+        string domain_name;
 
         cout << "Input subnet name: ";
         cin >> net_name;
@@ -125,23 +129,33 @@ private:
         cout << "Input max devices: ";
         cin >> max_devices;
 
-        if (current_level > 1)
+        if (tree->get_nets_count() > 0)
         {
+            cout << "Input subnet domain name: ";
+            cin >> domain_name;
+
             cout << "Input gateway router name: ";
             cin >> gateway_name;
         }
 
-        if (current_level == 1 || tree->get_net_by_gateway(gateway_name, current_level) != NULL)
-        {
-            if (tree->add_subnet(max_devices, current_level, net_name, gateway_name, current_level) == -1)
-                print_line("error:", "subnet name already in use", REDBG);
-            else
-                tree->add_dev(net_name, DEFROUTER, true);
-        }
-        else
-            print_line("error:", "gateway net unavailable", REDBG);
+        int ret_code = tree->add_subnet(max_devices, net_name, gateway_name, domain_name);
 
-        count = (count + 1) % current_level;
+        switch (ret_code)
+        {
+        case 0:
+            tree->add_dev(net_name, DEFROUTER, true);
+            break;
+        case -1:
+            print_line("error:", "subnet name already in use", REDBG);
+            break;
+
+        case -2:
+            print_line("error:", "gateway net unavailable", REDBG);
+            break;
+        default:
+            print_line("error:", "device not added", REDBG);
+            break;
+        }
     }
 
     /* Deletes all subnetworks in the network */
@@ -149,6 +163,47 @@ private:
     {
         tree->set_subnets_empty();
         print_line("system:", "all subnetworks deleted", BLUBG);
+    }
+
+    const void remove_command()
+    {
+        string input;
+        string subnet_name;
+        int ret_code = -2;
+        cout << "Input [net|dev]: ";
+        cin >> input;
+
+        if (input == "net")
+        {
+            cout << "Input subnetwork name: ";
+            cin >> subnet_name;
+            ret_code = tree->remove_net_by_name(subnet_name);
+        }
+
+        else if (input == "dev")
+        {
+            string dev_name;
+            cout << "Input subnetwork name: ";
+            cin >> subnet_name;
+            cout << "Input device name: ";
+            cin >> dev_name;
+            ret_code = tree->remove_dev_by_name(dev_name, subnet_name);
+        }
+
+        switch (ret_code)
+        {
+        case -1:
+            print_line("error:", "device not found", REDBG);
+            break;
+
+        case -2:
+            print_line("error:", "subnetwork not found", REDBG);
+            break;
+
+        default:
+            print_line("system:", "target removed", BLUBG);
+            break;
+        }
     }
 
     /* Handles device assignation to subnet */
@@ -275,6 +330,10 @@ public:
                 return 1;
             }
 
+            else if (command == "remove")
+            {
+                remove_command();
+            }
             else
                 print_line("error:", "invalid command", REDBG);
         }
