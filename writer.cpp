@@ -12,18 +12,18 @@ private:
     /// init functions ///
 
     /* Creates output directories */
-    const void init_dir(string dir)
+    const void init_dir(const string dir)
     {
         string command = "mkdir " + dir + " >> /dev/null 2>&1";
         system(&command[0]);
     }
 
     /* Service recursive procedure: routing discovery */
-    const void _init_route(string route, subnet *net)
+    const void _init_route(const string route, const subnet *net)
     {
         if (net && net->gateway.first)
         {
-            subnet *lan = tree->get_net_by_gateway(net->gateway.first->name, net->level);
+            const subnet *lan = tree->get_net_by_gateway(net->gateway.first->name, net->level);
 
             if (lan) // not subnet level 1
             {
@@ -45,7 +45,7 @@ private:
         {
             for (auto &net : tree->get_nets_by_level(i))
             {
-                string route = net->first_addr + "/" + to_string(net->prefix);
+                const string route = net->first_addr + "/" + to_string(net->prefix);
                 _init_route(route, net);
             }
         }
@@ -87,7 +87,7 @@ private:
     /// write functions ///
 
     /* Writes any interface lines in a file */
-    const void write_interface(ofstream &file, string interface_name, netface *dev, int prefix)
+    const void write_interface(ofstream &file, const string interface_name, const netface *dev, const int prefix)
     {
         file << "allow-hotplug " << interface_name << endl;
         file << "iface " << interface_name << " inet static" << endl;
@@ -100,7 +100,7 @@ private:
     }
 
     /* Writes any route line */
-    const void write_route(ofstream &file, string route)
+    const void write_route(ofstream &file, const string route)
     {
         file << "up /bin/ip route add " << route << endl;
     }
@@ -114,7 +114,7 @@ private:
     }
 
     /* Writes configuration interface file */
-    const void write_interfaces(bool include_loopback)
+    const void write_interfaces(const bool include_loopback)
     {
         for (auto &entity : entities)
         {
@@ -137,7 +137,7 @@ private:
     }
 
     /* Search entity by pointer in entities vector */
-    netent *search_by_netface(netface *dev)
+    netent *search_by_netface(const netface *dev)
     {
         for (auto &ent : entities)
         {

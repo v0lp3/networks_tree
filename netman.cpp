@@ -67,7 +67,7 @@ private:
 				node->net = new subnet;
 				node->net->name = net_name;
 				node->net->addressable = NULL;
-				node->net->gateway = std::make_pair((netface *)NULL, (netface *)NULL);
+				node->net->gateway = make_pair((netface *)NULL, (netface *)NULL);
 				allocated = true;
 			}
 
@@ -139,7 +139,7 @@ public:
 	}
 
 	/* Returns all devices addressed in subnet*/
-	vector<netface *> get_all_devices(subnet *net)
+	const vector<netface *> get_all_devices(const subnet *net)
 	{
 		vector<netface *> *addressable = new vector<netface *>();
 
@@ -152,7 +152,7 @@ public:
 	}
 
 	/* Returns device by name and subnet */
-	netface *get_dev_by_name(const string dev_name, subnet *net)
+	netface *get_dev_by_name(const string dev_name, const subnet *net)
 	{
 		for (auto &dev : get_all_devices(net))
 		{
@@ -163,7 +163,7 @@ public:
 	}
 
 	/* Returns devie by name and level */
-	subnet *get_net_by_gateway(const string dev_name, int level)
+	subnet *get_net_by_gateway(const string dev_name, const int level)
 	{
 		for (auto &net : *subnetworks)
 		{
@@ -174,8 +174,7 @@ public:
 	}
 
 	/* Returns all subnetworks by related gateway router */
-	vector<pair<netface *, int>>
-	get_netface_by_gateway(netface *dev, int prefix)
+	const vector<pair<netface *, int>> get_netface_by_gateway(netface *dev, const int prefix)
 	{
 		vector<pair<netface *, int>> interfaces;
 
@@ -210,7 +209,7 @@ public:
 	}
 
 	/* Returns vector of all routers in subnetwork */
-	vector<netface *> get_routers_by_net(subnet *net)
+	const vector<netface *> get_routers_by_net(const subnet *net)
 	{
 		vector<netface *> routers;
 
@@ -241,7 +240,7 @@ public:
 	}
 
 	/* Sets subnetwork level*/
-	const int set_net_level(const string net_name, int level)
+	const int set_net_level(const string net_name, const int level)
 	{
 		subnet *net = get_net_by_name(net_name);
 
@@ -255,7 +254,7 @@ public:
 	}
 
 	/* Set upper level gateway router */
-	const int set_gateway(const string net_name, const string gateway_name, subnet *domain)
+	const int set_gateway(const string net_name, const string gateway_name, const subnet *domain)
 	{
 		subnet *net = get_net_by_name(net_name);
 		netface *gateway = get_dev_by_name(gateway_name, domain);
@@ -347,7 +346,7 @@ public:
 	/// remover ///
 
 	/* Remove devices in subnetwork by name */
-	int remove_dev_by_name(string dev_name, string net_name)
+	const int remove_dev_by_name(const string dev_name, const string net_name)
 	{
 		subnet *net = get_net_by_name(net_name);
 
@@ -367,7 +366,7 @@ public:
 	}
 
 	/* Remove subnetworks by name */
-	int remove_net_by_name(string net_name)
+	const int remove_net_by_name(const string net_name)
 	{
 		int i = 0;
 

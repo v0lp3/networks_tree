@@ -21,7 +21,7 @@ private:
     }
 
     /* Prints any device in formatted way */
-    const void print_dev(netface *dev)
+    const void print_dev(const netface *dev)
     {
         if (dev)
         {
@@ -37,7 +37,7 @@ private:
     }
 
     /* Prints recursively path from subnet level 1 to desired subnet */
-    const void print_gateway_ancient(subnet *net)
+    const void print_gateway_ancient(const subnet *net)
     {
         if (net && net->gateway.first)
             print_gateway_ancient(tree->get_net_by_gateway(net->gateway.first->name, net->level));
@@ -46,7 +46,7 @@ private:
     }
 
     /* Prints any subnetwork in formatted way */
-    const void print_net(subnet *net)
+    const void print_net(const subnet *net)
     {
         cout << "\n";
 

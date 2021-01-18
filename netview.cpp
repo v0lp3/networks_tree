@@ -29,7 +29,7 @@ public:
         print_line("error:", info, REDBG);
     }
 
-    static const void evaluate_add(int ret_code)
+    static const void evaluate_add(const int ret_code)
     {
         switch (ret_code)
         {
@@ -49,7 +49,7 @@ public:
         }
     }
 
-    static const void evaluate_remove(int ret_code)
+    static const void evaluate_remove(const int ret_code)
     {
         switch (ret_code)
         {
@@ -71,7 +71,7 @@ public:
         }
     }
 
-    static const void evaluate_assign(int ret_code)
+    static const void evaluate_assign(const int ret_code)
     {
         switch (ret_code)
         {

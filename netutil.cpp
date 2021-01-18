@@ -64,12 +64,12 @@ public:
     }
 
     /* Converts base 10 to fixed-length base 2 */
-    static const string get_fixed_length(const int integer, int fixed_length)
+    static const string get_fixed_length(const int integer, const int fixed_length)
     {
         string bits = int_to_bin(integer); // es. 10 => |1010| < 8
 
         // 0 => 00000000
-        int bound = fixed_length - bits.length();
+        const int bound = fixed_length - bits.length();
 
         for (int i = 0; i < bound; i++)
             bits = '0' + bits;
@@ -109,14 +109,14 @@ public:
     /* Returns ip address prefix in base 2*/
     static const string get_bin_prefix(const string address, const int prefix_len)
     {
-        string addr_bin = ip_to_bin(address); // conversion to binary
+        const string addr_bin = ip_to_bin(address); // conversion to binary
         return addr_bin.substr(0, prefix_len);
     }
 
     /* Returns the minimum number of levels needed */
     static const int get_total_level(const int max_devices)
     {
-        double levels = log2(max_devices);
+        const double levels = log2(max_devices);
         return (levels > int(levels)) ? levels + 1 : levels;
     }
 
