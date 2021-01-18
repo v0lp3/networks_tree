@@ -5,6 +5,8 @@
 #include "netdef.h"
 #include "netutil.cpp"
 
+using std::make_pair;
+using std::pair;
 using std::string;
 using std::vector;
 
@@ -110,6 +112,8 @@ private:
 	}
 
 public:
+	int max_subnet_level; //statefull
+
 	netman(const string addr, const int prefix_len)
 	{
 		base_addr = netutil::get_bin_prefix(addr, prefix_len);
@@ -134,31 +138,6 @@ public:
 		return NULL;
 	}
 
-	/* Returns device by name and subnet */
-	netface *get_dev_by_name(const string dev_name, subnet *net)
-	{
-		for (int i = 0; i < netutil::get_bound(net->prefix); i++)
-		{
-			if (net->addressable[i] && net->addressable[i]->name == dev_name)
-				return net->addressable[i];
-		}
-		return NULL;
-	}
-
-	/* Returns devie by name and level */
-	subnet *get_net_by_gateway(const string dev_name, int level)
-	{
-		for (auto &net : *subnetworks)
-		{
-			for (int i = 0; i < netutil::get_bound(net->prefix); i++)
-			{
-				if (net->addressable[i] && net->addressable[i]->name == dev_name && net->level == level - 1)
-					return net;
-			}
-		}
-		return NULL;
-	}
-
 	/* Returns all devices addressed in subnet*/
 	vector<netface *> get_all_devices(subnet *net)
 	{
@@ -172,10 +151,76 @@ public:
 		return *addressable;
 	}
 
+	/* Returns device by name and subnet */
+	netface *get_dev_by_name(const string dev_name, subnet *net)
+	{
+		for (auto &dev : get_all_devices(net))
+		{
+			if (dev->name == dev_name)
+				return dev;
+		}
+		return NULL;
+	}
+
+	/* Returns devie by name and level */
+	subnet *get_net_by_gateway(const string dev_name, int level)
+	{
+		for (auto &net : *subnetworks)
+		{
+			if (get_dev_by_name(dev_name, net) && net->level == level - 1)
+				return net;
+		}
+		return NULL;
+	}
+
+	/* Returns all subnetworks by related gateway router */
+	vector<pair<netface *, int>>
+	get_netface_by_gateway(netface *dev, int prefix)
+	{
+		vector<pair<netface *, int>> interfaces;
+
+		interfaces.push_back(make_pair(dev, prefix));
+
+		for (auto &net : *subnetworks)
+		{
+			if (net->gateway.first == dev)
+				interfaces.push_back(make_pair(net->gateway.second, net->prefix));
+		}
+		return interfaces;
+	}
+
 	/* Returns vector of subnetworks pointers*/
 	const vector<subnet *> *get_all_nets()
 	{
 		return subnetworks;
+	}
+
+	/* Returns vector of subnetworks by level */
+	const vector<subnet *> get_nets_by_level(const int level)
+	{
+		vector<subnet *> nets;
+
+		for (auto &net : *subnetworks)
+		{
+			if (net->level == level)
+				nets.push_back(net);
+		}
+
+		return nets;
+	}
+
+	/* Returns vector of all routers in subnetwork */
+	vector<netface *> get_routers_by_net(subnet *net)
+	{
+		vector<netface *> routers;
+
+		for (auto &dev : get_all_devices(net))
+		{
+			if (dev->router)
+				routers.push_back(dev);
+		}
+
+		return routers;
 	}
 
 	/// setter ///
@@ -234,19 +279,23 @@ public:
 			bool allocated = false; // multi-allocation avoidance
 			subnet *domain = get_net_by_name(domain_name);
 
-			if (get_all_nets()->size() == 0 || (domain && get_dev_by_name(gateway_name, domain)))
+			if (get_all_nets()->size() == 0 || (domain && get_dev_by_name(gateway_name, domain))) //subnet level 1 or domain and gateway exists
 			{
 				_add_subnet(root, level, net_name, allocated);
 				set_netmasks();
 
 				if (get_all_nets()->size() > 1)
 				{
+					max_subnet_level = (domain->level + 1 > max_subnet_level) ? domain->level + 1 : max_subnet_level;
 					set_net_level(net_name, domain->level + 1);
 					return set_gateway(net_name, gateway_name, domain);
 				}
 
 				else
+				{
 					set_net_level(net_name, 1);
+					max_subnet_level = 1;
+				}
 
 				return 0;
 			}
