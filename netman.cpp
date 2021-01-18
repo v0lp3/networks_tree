@@ -110,6 +110,8 @@ private:
 	}
 
 public:
+	int max_subnet_level; //statefull
+
 	netman(const string addr, const int prefix_len)
 	{
 		base_addr = netutil::get_bin_prefix(addr, prefix_len);
@@ -178,6 +180,34 @@ public:
 		return subnetworks;
 	}
 
+	/* Returns vector of subnetworks by level */
+	const vector<subnet *> get_nets_by_level(const int level)
+	{
+		vector<subnet *> nets;
+
+		for (auto &net : *subnetworks)
+		{
+			if (net->level == level)
+				nets.push_back(net);
+		}
+
+		return nets;
+	}
+
+	/* Returns vector of all routers in subnetwork */
+	vector<netface *> get_all_routers(subnet *net)
+	{
+		vector<netface *> routers;
+
+		for (int i = 0; i < netutil::get_bound(net->prefix); i++)
+		{
+			if (net && net->addressable[i] && net->addressable[i]->router)
+				routers.push_back(net->addressable[i]);
+		}
+
+		return routers;
+	}
+
 	/// setter ///
 
 	/* Sets subnetworks info in the structures*/
@@ -241,12 +271,16 @@ public:
 
 				if (get_all_nets()->size() > 1)
 				{
+					max_subnet_level = (domain->level + 1 > max_subnet_level) ? domain->level + 1 : max_subnet_level;
 					set_net_level(net_name, domain->level + 1);
 					return set_gateway(net_name, gateway_name, domain);
 				}
 
 				else
+				{
 					set_net_level(net_name, 1);
+					max_subnet_level = 1;
+				}
 
 				return 0;
 			}

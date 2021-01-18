@@ -233,7 +233,7 @@ public:
     }
 
     /* Parse user input */
-    const int execute_command()
+    const netman *execute_command()
     {
         help_command();
         while (1)
@@ -258,10 +258,7 @@ public:
                 remove_command();
 
             else if (command == "write")
-            {
-                netview::print_info("all files writed");
-                return 1;
-            }
+                return tree;
 
             else
                 netview::print_error("invalid command");

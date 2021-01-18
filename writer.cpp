@@ -1,5 +1,6 @@
 using std::string;
 using std::vector;
+using std::__cxx11::to_string;
 
 class writer
 {
@@ -37,25 +38,6 @@ private:
         }
     }
 
-    /* Writes loopback lines */
-    const void write_loopback(ofstream *file)
-    {
-
-        *file << "auto lo" << endl;
-        *file << "iface lo inet interface" << endl;
-        *file << endl;
-    }
-
-public:
-    writer(netman *tree)
-    {
-
-        this->tree = tree;
-
-        init_dir();
-        init_files();
-    }
-
     /* Writes configuration interface file */
     const void write_interface(const string interface_name, bool include_loopback)
     {
@@ -71,6 +53,76 @@ public:
 
             if (file.second.first->gateway && file.second.first->gateway->address.length() > 0)
                 *file.first << "gateway " << file.second.first->gateway->address << endl;
+        }
+    }
+
+    /* Writes loopback lines */
+    const void write_loopback(ofstream *file)
+    {
+
+        *file << "auto lo" << endl;
+        *file << "iface lo inet interface" << endl;
+        *file << endl;
+    }
+
+    ofstream *search_file_writer(netface *dev)
+    {
+
+        for (auto &device : *devices)
+        {
+            if (device.second.first == dev)
+                return device.first;
+        }
+
+        return NULL;
+    }
+
+    const void _write_route(string route, subnet *net)
+    {
+
+        if (net && net->gateway.first)
+        {
+            subnet *lan = tree->get_net_by_gateway(net->gateway.first->name, net->level);
+
+            if (lan)
+            {
+                vector<netface *> routers = tree->get_all_routers(lan);
+
+                for (auto &router : routers)
+                {
+                    if (router->name != net->gateway.first->name)
+                    {
+                        ofstream *file = search_file_writer(router);
+                        *file << "up /bin/ip route add " << route << " via " << net->gateway.first->address << endl;
+                    }
+                }
+
+                _write_route(route, lan);
+            }
+        }
+    }
+
+public:
+    writer(netman *tree)
+    {
+
+        this->tree = tree;
+
+        init_dir();
+        init_files();
+    }
+
+    const void write_route()
+    {
+        for (int i = tree->max_subnet_level; i > 1; i--)
+        {
+            vector<subnet *> nets = tree->get_nets_by_level(i);
+
+            for (auto &net : nets)
+            {
+                string route = net->first_addr + "/" + to_string(net->prefix);
+                _write_route(route, net);
+            }
         }
     }
 };
