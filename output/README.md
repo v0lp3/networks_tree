@@ -9,11 +9,12 @@ Ip address in output file are assigned by random function, you are freely to cha
 
 ```
 
-                                                        ----lan02---B---C
-                                                        |
-                                       -----ROUTER1-----           
-                                      /                 |
-                                  A  /                  ----lan03---D---E
+                                                         ----lan02---B---C
+                                                         |
+                                        -----ROUTER1-----           
+                                       /                 |
+                                      /                  ----lan03---D---E
+                                  A  /
                                   | /              
 GATEWAY---lan00---ROUTER0---lan01---                 
                                     \
