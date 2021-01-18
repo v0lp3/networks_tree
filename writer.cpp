@@ -119,8 +119,8 @@ private:
         for (auto &entity : entities)
         {
             int i = 0;
-            init_dir(entity.path);
-            ofstream file(entity.path + entity.name);
+            init_dir(OUTPUTDIR + entity.path);
+            ofstream file(OUTPUTDIR + entity.path + entity.name);
 
             file << "source /etc/network/interfaces.d/*" << endl
                  << endl;
@@ -161,6 +161,8 @@ public:
     const void write()
     {
         string input;
+
+        init_dir(OUTPUTDIR);
 
         cout << "Include loopback interface? (y/N): ";
         cin >> input;

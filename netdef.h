@@ -2,6 +2,7 @@
 #define ERROR_LEN "BITS LENGTH ERROR"
 #define DEFROUTER "gateway"
 #define DEFIFACE "enp0s"
+#define OUTPUTDIR "output/"
 
 //output style
 #define RSCLR "\033[0m"
