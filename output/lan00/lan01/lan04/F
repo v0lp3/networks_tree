@@ -1,0 +1,7 @@
+source /etc/network/interfaces.d/*
+
+allow-hotplug enp0s0
+iface enp0s0 inet static
+address 10.0.129.45/24
+gateway 10.0.129.107
+
