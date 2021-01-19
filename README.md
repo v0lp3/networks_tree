@@ -14,7 +14,7 @@
 
 `Networks tree` is a software that automate IPv4 subnetting, after you have designed your networks, you can output the entire structure and put the static configuration files in your devices. [More info](https://wiki.debian.org/NetworkConfiguration)
 
-[Here](https://github.com/v0lp3/networks_tree/tree/master/output) an example of output, result of [this commands](https://github.com/v0lp3/networks_tree/blob/master/docs/test_config.txt).
+[Here](https://github.com/v0lp3/networks_tree/tree/master/output) an example of output, result of [these commands](https://github.com/v0lp3/networks_tree/blob/master/docs/test_config.txt).
 
 ### Requirements
 
