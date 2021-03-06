@@ -39,7 +39,7 @@ public:
     }
 
     /* ipv4 ip builder */
-    string bin_to_addr(string bits)
+    string bin_to_ip(string bits)
     {
         if (bits.length() != MAX_IPV4_LEN)
             return ERROR_LEN;

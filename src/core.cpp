@@ -8,7 +8,6 @@ class core
 
 private:
     netman *tree;
-
     /// Print functions ///
 
     /* Prints info */
@@ -67,7 +66,7 @@ private:
         netview::format_output("level: ", GRCLR) << net->level << endl; // subnet level
 
         // list of attached devices
-        for (int i = 0; i < netutil::get_bound(net->prefix); i++)
+        for (int i = 0; i < tree->utility->get_bound(net->prefix); i++)
             print_dev(net->addressable[i]);
     }
 
@@ -191,17 +190,36 @@ private:
         netview::evaluate_assign(ret_code);
     }
 
+    netman *write_command()
+    {
+        return tree;
+    }
+
     /* Initialize networks tree*/
     const int init_tree()
     {
-        string range; //ip
+        string range;
         int prefix;
+        bool ipv6;
 
-        cout << "Input the range of address available on the network (es: x.x.x.x/x): ";
+        cout << "Would you use IPV6 mode? [0 | 1] (default IPV6): ";
+
+        cin >> ipv6;
+
+        cout << "Input the range of address available on the network: ";
 
         netutil::parse_address_input(range, prefix);
 
-        tree = (prefix > MAX_ADDR_LEN) ? NULL : new netman(range, prefix);
+        if (ipv6)
+        {
+            cout << "net6";
+            tree = (prefix > MAX_IPV6_LEN) ? NULL : new netman(range, prefix, true);
+        }
+        else
+        {
+            cout << "net4";
+                tree = (prefix > MAX_IPV4_LEN) ? NULL : new netman(range, prefix, false);
+        }
 
         if (tree == NULL)
         {
@@ -219,9 +237,7 @@ public:
         print_header();
 
         if (init_tree() == -1)
-        {
             return -1;
-        }
 
         return 0;
     }

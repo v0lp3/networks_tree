@@ -5,7 +5,7 @@ using namespace std;
 class netutil
 {
 public:
-    string bin_to_addr(string bits);
+    virtual string bin_to_ip(string bits) = 0;
 
     /* Converts base 10 to base 2 */
     string int_to_bin(int integer)
@@ -35,17 +35,17 @@ public:
         return bits;
     }
 
-    string ip_to_bin(string address);
+    virtual string ip_to_bin(string address) = 0;
 
     /* Returns number of address in network */
-    int get_bound(int prefix_length);
-    
+    virtual int get_bound(int prefix_length) = 0;
     /* Returns ip address prefix in base 2*/
     string get_bin_prefix(string address, int prefix_len)
     {
         string addr_bin = ip_to_bin(address); // conversion to binary
         return addr_bin.substr(0, prefix_len);
     }
+    
 
     /* Returns the minimum number of levels needed */
     int get_total_level(int max_devices)
@@ -54,7 +54,7 @@ public:
         return (levels > int(levels)) ? levels + 1 : levels;
     }
 
-    int get_remain_bit(int addr_len);
+    virtual int get_remain_bit(int addr_len) = 0;
 
     /* Returns 4 octets address. mode 0: first address of the network, mode 1: last address */
     string complete_address(string base_address, string path, bool mode)
@@ -74,7 +74,7 @@ public:
     }
 
     /* Parses address with mask */
-    void parse_address_input(string &range, int &prefix)
+    static void parse_address_input(string &range, int &prefix)
     {
         string input; // entire input
         cin >> input;

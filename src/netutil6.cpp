@@ -18,7 +18,9 @@ private:
             {
                 sstream << hex << hex_n;
                 string quartet = sstream.str();
-                address = quartet + ":" + address;
+
+                string tmp_addr = quartet + address;
+                address = (pos > 0) ? ":" + tmp_addr : tmp_addr;
                 hex_n = 0;
                 exponent = 0;
                 sstream.str("");
@@ -39,7 +41,7 @@ public:
         return integer;
     }
 
-    string bin_to_addr(string bits)
+    string bin_to_ip(string bits)
     {
         if (bits.length() != MAX_IPV6_LEN)
             return ERROR_LEN;
@@ -60,7 +62,7 @@ public:
                 quartet_count++;
 
         // 8 quartet => xxxx:xxxx:xxxx:xxxx:xxxx:xxxx:xxxx:xxxx
-        int remain_quartet = 6 - bitcount;
+        int remain_quartet = 6 - quartet_count;
         for (int i = 0; i < address.length(); i++)
         {
             if (i < address.length() - 1 && address[i] == ':' && address[i + 1] == ':')

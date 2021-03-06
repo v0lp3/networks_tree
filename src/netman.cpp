@@ -72,11 +72,11 @@ const void netman::_set_netmasks(netbitn *node, const string path)
 		if (node->net != NULL && !(node->defined)) // node can represent any subnetwork
 		{
 			node->net->prefix = prefix_len + path.length();
-			node->net->first_addr = netutil::bin_to_ip(netutil::complete_address(base_addr, path, 0));
-			node->net->last_addr = netutil::bin_to_ip(netutil::complete_address(base_addr, path, 1));
-			node->net->addressable = new netface *[netutil::get_bound(node->net->prefix)]; // array positon represents the interface
+			node->net->first_addr = utility->bin_to_ip(utility->complete_address(base_addr, path, 0));
+			node->net->last_addr = utility->bin_to_ip(utility->complete_address(base_addr, path, 1));
+			node->net->addressable = new netface *[utility->get_bound(node->net->prefix)]; // array positon represents the interface
 
-			for (int i = 0; i < netutil::get_bound(node->net->prefix); i++)
+			for (int i = 0; i < utility->get_bound(node->net->prefix); i++)
 				node->net->addressable[i] = NULL;
 
 			node->defined = true; // avoid multiple-redefinition
@@ -89,13 +89,27 @@ const void netman::_set_netmasks(netbitn *node, const string path)
 	}
 }
 
-netman::netman(const string addr, const int prefix_len)
+netman::netman(const string addr, const int prefix_len, bool ipv6)
 {
-	base_addr = netutil::get_bin_prefix(addr, prefix_len);
-	this->prefix_len = prefix_len;
 
+	if (ipv6)
+	{
+		netutil6 *util = new netutil6;
+		max_addr_len = MAX_IPV6_LEN;
+		utility = util;
+	}
+
+	else
+	{
+		netutil4 *util = new netutil4;
+		max_addr_len = MAX_IPV4_LEN;
+		utility = util;
+	}
+
+	base_addr = utility->get_bin_prefix(addr, prefix_len);
+	this->prefix_len = prefix_len;
 	// structures init
-	root = init_netbitn(MAX_ADDR_LEN - prefix_len); // root level = max bits available
+	root = init_netbitn(max_addr_len - prefix_len); // root level = max bits available
 	subnetworks = new vector<subnet *>();
 }
 
@@ -118,7 +132,7 @@ const vector<netface *> netman::get_all_devices(const subnet *net)
 {
 	vector<netface *> *addressable = new vector<netface *>();
 
-	for (int i = 0; i < netutil::get_bound(net->prefix); i++)
+	for (int i = 0; i < utility->get_bound(net->prefix); i++)
 	{
 		if (net->addressable[i])
 			addressable->push_back(net->addressable[i]);
@@ -209,7 +223,7 @@ const void netman::set_netmasks()
 /* Deletes all subnetworks */
 const int netman::set_subnets_empty()
 {
-	root = init_netbitn(MAX_ADDR_LEN - prefix_len);
+	root = init_netbitn(max_addr_len - prefix_len);
 	subnetworks->clear();
 	return 1;
 }
@@ -249,7 +263,7 @@ const int netman::add_subnet(const int max_addressable, const string net_name, c
 {
 	if (get_net_by_name(net_name) == NULL)
 	{
-		const int level = netutil::get_total_level(max_addressable + 1);
+		const int level = utility->get_total_level(max_addressable + 1);
 		bool allocated = false; // multi-allocation avoidance
 		subnet *domain = get_net_by_name(domain_name);
 
@@ -298,16 +312,16 @@ const int netman::add_dev(const string net_name, const string dev_name, const bo
 
 		do
 		{
-			if (attempt++ > netutil::get_bound(sel_subnet->prefix))
+			if (attempt++ > utility->get_bound(sel_subnet->prefix))
 				return -4;
 
-			interface = rand() % (netutil::get_bound(sel_subnet->prefix) - 1); // last address is broadcast
+			interface = rand() % (utility->get_bound(sel_subnet->prefix) - 1); // last address is broadcast
 
 		} while (sel_subnet->addressable[interface] != NULL); // the address is free
 
 		// generation of a valid ipv4 address in the range
-		string address = netutil::get_bin_prefix(sel_subnet->first_addr, sel_subnet->prefix) + netutil::get_fixed_length(interface, MAX_ADDR_LEN - sel_subnet->prefix);
-		sel_subnet->addressable[interface] = init_netface(router, dev_name, sel_subnet, netutil::bin_to_ip(address));
+		string address = utility->get_bin_prefix(sel_subnet->first_addr, sel_subnet->prefix) + utility->get_fixed_length(interface, max_addr_len - sel_subnet->prefix);
+		sel_subnet->addressable[interface] = init_netface(router, dev_name, sel_subnet, utility->bin_to_ip(address));
 
 		if (router && sel_subnet->gateway.second == NULL) // set default gateway
 			sel_subnet->gateway.second = sel_subnet->addressable[interface];
@@ -327,7 +341,7 @@ const int netman::remove_dev_by_name(const string dev_name, const string net_nam
 
 	if (net)
 	{
-		for (int i = 0; i < netutil::get_bound(net->prefix); i++)
+		for (int i = 0; i < utility->get_bound(net->prefix); i++)
 		{
 			if (net->addressable[i] && net->addressable[i]->name == dev_name)
 			{
