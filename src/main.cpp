@@ -1,7 +1,8 @@
 #include <iostream>
 #include <fstream>
+#include <sstream>
+#include <map>
 #include "core.cpp"
-#include "writer.cpp"
 
 using namespace std;
 
@@ -15,9 +16,5 @@ int main()
 		return -1;
 	}
 
-	const netman *networks_tree = system.execute_command();
-
-	writer controller(system.get_tree_instance());
-
-	controller.write();
+	system.execute_command();
 }

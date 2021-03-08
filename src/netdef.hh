@@ -1,4 +1,5 @@
-#define MAX_ADDR_LEN 32
+#define MAX_IPV4_LEN 32
+#define MAX_IPV6_LEN 128
 #define ERROR_LEN "BITS LENGTH ERROR"
 #define DEFROUTER "gateway"
 #define DEFIFACE "enp0s"
@@ -12,9 +13,7 @@
 #define GRCLR "\033[1;32m"
 #define REDCLR "\033[1;31m"
 
-using std::pair;
-using std::string;
-using std::vector;
+using namespace std;
 
 struct interface
 {
