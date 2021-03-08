@@ -4,8 +4,8 @@
 <p align="center">
       <img
             src="https://raw.githubusercontent.com/v0lp3/networks_tree/master/docs/show.png"
-            width=50%
-            height=50%
+            width=30%
+            height=30%
             alt="show command"
       /> 
  </p>
