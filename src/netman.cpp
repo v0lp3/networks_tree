@@ -1,5 +1,3 @@
-// Binary tree that manage network bits node (netbitn)
-
 #include "netman.hh"
 
 using namespace std;
@@ -15,7 +13,6 @@ netbitn *netman::init_netbitn(const int level)
 	return node;
 }
 
-/* Returns initialized network device */
 netface *netman::init_netface(const bool is_router, const string dev_name, subnet *subnet, const string address)
 {
 	netface *device = new netface;
@@ -25,16 +22,12 @@ netface *netman::init_netface(const bool is_router, const string dev_name, subne
 	return device;
 }
 
-/* Function that check and index the subnet */
 const void netman::index_subnet(subnet *net)
 {
 	if (get_net_by_name(net->name) == NULL)
 		subnetworks->push_back(net);
 }
 
-/// Service procedures ///
-
-/* Service procedure to allocate subnet*/
 const void netman::_add_subnet(netbitn *node, const int level, const string net_name, bool &allocated)
 {
 	if (node && node->net == NULL && !(allocated || node->level < level))
@@ -64,7 +57,6 @@ const void netman::_add_subnet(netbitn *node, const int level, const string net_
 	}
 }
 
-/* Service procedure to sets subnets info */
 const void netman::_set_netmasks(netbitn *node, const string path)
 {
 	if (node) // node exists
@@ -108,17 +100,15 @@ netman::netman(const string addr, const int prefix_len, bool ipv6)
 
 	base_addr = utility->get_bin_prefix(addr, prefix_len);
 	this->prefix_len = prefix_len;
+
 	// structures init
 	root = init_netbitn(max_addr_len - prefix_len); // root level = max bits available
 	subnetworks = new vector<subnet *>();
 }
 
-/// getter //
-
-/* Returns subnetwork by name */
 subnet *netman::get_net_by_name(const string name)
 {
-	for (auto &net : *subnetworks)
+	for (subnet *net : *subnetworks)
 	{
 		if (net->name == name)
 			return net;
@@ -127,7 +117,6 @@ subnet *netman::get_net_by_name(const string name)
 	return NULL;
 }
 
-/* Returns all devices addressed in subnet*/
 const vector<netface *> netman::get_all_devices(const subnet *net)
 {
 	vector<netface *> *addressable = new vector<netface *>();
@@ -140,10 +129,9 @@ const vector<netface *> netman::get_all_devices(const subnet *net)
 	return *addressable;
 }
 
-/* Returns device by name and subnet */
 netface *netman::get_dev_by_name(const string dev_name, const subnet *net)
 {
-	for (auto &dev : get_all_devices(net))
+	for (netface *dev : get_all_devices(net))
 	{
 		if (dev->name == dev_name)
 			return dev;
@@ -151,10 +139,9 @@ netface *netman::get_dev_by_name(const string dev_name, const subnet *net)
 	return NULL;
 }
 
-/* Returns devie by name and level */
 subnet *netman::get_net_by_gateway(const string dev_name, const int level)
 {
-	for (auto &net : *subnetworks)
+	for (subnet *net : *subnetworks)
 	{
 		if (get_dev_by_name(dev_name, net) && net->level == level - 1)
 			return net;
@@ -162,14 +149,13 @@ subnet *netman::get_net_by_gateway(const string dev_name, const int level)
 	return NULL;
 }
 
-/* Returns all subnetworks by related gateway router */
 const vector<pair<netface *, int>> netman::get_netface_by_gateway(netface *dev, const int prefix)
 {
 	vector<pair<netface *, int>> interfaces;
 
 	interfaces.push_back(make_pair(dev, prefix));
 
-	for (auto &net : *subnetworks)
+	for (subnet *net : *subnetworks)
 	{
 		if (net->gateway.first == dev)
 			interfaces.push_back(make_pair(net->gateway.second, net->prefix));
@@ -177,18 +163,16 @@ const vector<pair<netface *, int>> netman::get_netface_by_gateway(netface *dev, 
 	return interfaces;
 }
 
-/* Returns vector of subnetworks pointers*/
 const vector<subnet *> *netman::get_all_nets()
 {
 	return subnetworks;
 }
 
-/* Returns vector of subnetworks by level */
 const vector<subnet *> netman::get_nets_by_level(const int level)
 {
 	vector<subnet *> nets;
 
-	for (auto &net : *subnetworks)
+	for (subnet *net : *subnetworks)
 	{
 		if (net->level == level)
 			nets.push_back(net);
@@ -197,12 +181,11 @@ const vector<subnet *> netman::get_nets_by_level(const int level)
 	return nets;
 }
 
-/* Returns vector of all routers in subnetwork */
 const vector<netface *> netman::get_routers_by_net(const subnet *net)
 {
 	vector<netface *> routers;
 
-	for (auto &dev : get_all_devices(net))
+	for (netface *dev : get_all_devices(net))
 	{
 		if (dev->router)
 			routers.push_back(dev);
@@ -211,16 +194,12 @@ const vector<netface *> netman::get_routers_by_net(const subnet *net)
 	return routers;
 }
 
-/// setter ///
-
-/* Sets subnetworks info in the structures*/
 const void netman::set_netmasks()
 {
 	const string path = ""; //additional mask
 	_set_netmasks(root, path);
 }
 
-/* Deletes all subnetworks */
 const int netman::set_subnets_empty()
 {
 	root = init_netbitn(max_addr_len - prefix_len);
@@ -228,7 +207,6 @@ const int netman::set_subnets_empty()
 	return 1;
 }
 
-/* Sets subnetwork level*/
 const int netman::set_net_level(const string net_name, const int level)
 {
 	subnet *net = get_net_by_name(net_name);
@@ -242,7 +220,6 @@ const int netman::set_net_level(const string net_name, const int level)
 	return -1;
 }
 
-/* Set upper level gateway router */
 const int netman::set_gateway(const string net_name, const string gateway_name, const subnet *domain)
 {
 	subnet *net = get_net_by_name(net_name);
@@ -256,9 +233,6 @@ const int netman::set_gateway(const string net_name, const string gateway_name, 
 	return -2;
 }
 
-/// adder ///
-
-/* Allocates address space in network tree  */
 const int netman::add_subnet(const int max_addressable, const string net_name, const string gateway_name, const string domain_name)
 {
 	if (get_net_by_name(net_name) == NULL)
@@ -294,7 +268,6 @@ const int netman::add_subnet(const int max_addressable, const string net_name, c
 	return -1;
 }
 
-/* Add addressable to the subnetwork */
 const int netman::add_dev(const string net_name, const string dev_name, const bool router)
 {
 	subnet *sel_subnet = get_net_by_name(net_name);
@@ -332,9 +305,6 @@ const int netman::add_dev(const string net_name, const string dev_name, const bo
 	return 0;
 }
 
-/// remover ///
-
-/* Remove devices in subnetwork by name */
 const int netman::remove_dev_by_name(const string dev_name, const string net_name)
 {
 	subnet *net = get_net_by_name(net_name);
@@ -354,12 +324,11 @@ const int netman::remove_dev_by_name(const string dev_name, const string net_nam
 	return -2;
 }
 
-/* Remove subnetworks by name */
 const int netman::remove_net_by_name(const string net_name)
 {
 	int i = 0;
 
-	for (auto &net : *subnetworks)
+	for (subnet *net : *subnetworks)
 	{
 		if (net->name == net_name)
 		{

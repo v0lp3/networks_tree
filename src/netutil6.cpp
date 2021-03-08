@@ -3,7 +3,7 @@ using namespace std;
 class netutil6 : public netutil
 {
 private:
-    string bin_to_ipv6(string bits)
+    const string bin_to_ipv6(const string bits)
     {
         string address = "";
         stringstream sstream;
@@ -27,7 +27,7 @@ private:
             }
         }
 
-        // adddress shortener
+        // address shortener
 
         int max_count = 0;
         int start;
@@ -58,7 +58,7 @@ private:
     }
 
 public:
-    int parse_ipv6_quartet(string number)
+    const int parse_ipv6_quartet(const string number)
     {
         int integer;
 
@@ -69,7 +69,7 @@ public:
         return integer;
     }
 
-    string bin_to_ip(string bits)
+    string bin_to_ip(const string bits)
     {
         if (bits.length() != MAX_IPV6_LEN)
             return ERROR_LEN;
@@ -78,7 +78,7 @@ public:
     }
 
     /* Returns 128 bit */
-    string ip_to_bin(string address)
+    string ip_to_bin(const string address)
     {
         string bits = "";
         string tmp_hex = "";
@@ -119,12 +119,12 @@ public:
         return (bits.length() == MAX_IPV6_LEN) ? bits : ERROR_LEN;
     }
 
-    int get_bound(int prefix_length)
+    int get_bound(const int prefix_length)
     {
         return pow(2, MAX_IPV6_LEN - prefix_length);
     }
 
-    int get_remain_bit(int addr_len)
+    int get_remain_bit(const int addr_len)
     {
         return MAX_IPV6_LEN - addr_len;
     }

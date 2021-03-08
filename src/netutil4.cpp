@@ -2,7 +2,7 @@ using namespace std;
 class netutil4 : public netutil
 {
 private:
-    string bin_to_ipv4(string bits)
+    const string bin_to_ipv4(const string bits)
     {
         string address = ""; //x.x.x.x
 
@@ -28,7 +28,7 @@ private:
 
 public:
     /* Parses ipv4 (e.g. 255) to int  */
-    int parse_ipv4_octet(string number)
+    const int parse_ipv4_octet(const string number)
     {
         int integer = 0; //max 255
 
@@ -39,7 +39,7 @@ public:
     }
 
     /* ipv4 ip builder */
-    string bin_to_ip(string bits)
+    string bin_to_ip(const string bits)
     {
         if (bits.length() != MAX_IPV4_LEN)
             return ERROR_LEN;
@@ -47,7 +47,7 @@ public:
     }
 
     /* Returns 4 binary octets */
-    string ip_to_bin(string address)
+    string ip_to_bin(const string address)
     {
         string bits = "";
         string tmp_number = "";
@@ -69,12 +69,12 @@ public:
         return (bits.length() == MAX_IPV4_LEN) ? bits : ERROR_LEN;
     }
 
-    int get_bound(int prefix_length)
+    int get_bound(const int prefix_length)
     {
         return pow(2, MAX_IPV4_LEN - prefix_length);
     }
 
-    int get_remain_bit(int addr_len)
+    int get_remain_bit(const int addr_len)
     {
         return MAX_IPV4_LEN - addr_len;
     }
