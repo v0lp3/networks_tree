@@ -1,3 +1,4 @@
+0
 10.0.128.0/17
 add lan00 2
 assign lan00 y router1

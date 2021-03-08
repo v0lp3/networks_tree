@@ -1,0 +1,18 @@
+1
+2001:abcd::1234:0000/96
+add lan00 10
+assign lan00 y router1
+assign lan00 n A
+assign lan00 n B
+add lan01 150000 lan00 router1
+add lan02 500000 lan00 router1
+add lan03 50000 lan00 router1
+assign lan01 y router1
+assign lan01 n C
+assign lan01 n D
+assign lan02 n E
+assign lan02 n F
+assign lan03 n G
+assign lan03 n H
+add lan04 2000000 lan01 router1
+assign lan04 n I
