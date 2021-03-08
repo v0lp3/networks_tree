@@ -26,6 +26,34 @@ private:
                 sstream.str("");
             }
         }
+
+        // adddress shortener
+
+        int max_count = 0;
+        int start;
+        int end;
+
+        for (int i = 0; i < address.length() - 2; i++)
+        {
+            int loc_count = 0;
+            int j = i;
+            while (address[j] == ':' && address[j + 1] == '0' && address[j + 2] == ':' && j < address.length() - 2)
+            {
+                loc_count++;
+                j += 2;
+                end = j;
+            }
+
+            if (loc_count > max_count)
+            {
+                max_count = loc_count;
+                start = i;
+            }
+        }
+
+        if (max_count > 1)
+            address.replace(start, end - start + 1, "::");
+
         return address;
     }
 
